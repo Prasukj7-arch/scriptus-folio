@@ -1,14 +1,14 @@
-# Book Review Platform
+# Personal Book Library
 
-A full-stack MERN application for book reviews where users can sign up, log in, add books, and review them.
+A full-stack MERN application for personal book management where users can track, review, and organize their personal reading collection.
 
 ## Features
 
 - **User Authentication**: Sign up and login with JWT tokens
-- **Book Management**: Add, edit, and delete books (only by creators)
-- **Review System**: Rate and review books with 1-5 stars
-- **Search & Filter**: Search by title/author and filter by genre
-- **Pagination**: Browse books with pagination (5 books per page)
+- **Personal Book Management**: Add, edit, and delete your own books
+- **Personal Review System**: Rate and review your books with 1-5 stars
+- **Search & Filter**: Search by title/author and filter by genre within your collection
+- **Pagination**: Browse your books with pagination (6 books per page)
 - **Responsive Design**: Modern UI with Tailwind CSS and shadcn/ui
 
 ## Tech Stack
@@ -40,7 +40,7 @@ A full-stack MERN application for book reviews where users can sign up, log in, 
 
 ```bash
 git clone <your-repo-url>
-cd scriptus-folio
+cd personal-book-library
 ```
 
 ### 2. Backend Setup
@@ -147,11 +147,11 @@ The application will be available at:
 
 ## Usage
 
-1. **Sign Up/Login**: Create an account or login to access features
-2. **Add Books**: Click "Add Book" to add new books to the platform
-3. **Browse Books**: View all books with search and filter options
-4. **Review Books**: Click on any book to view details and add reviews
-5. **Manage Content**: Edit or delete your own books and reviews
+1. **Sign Up/Login**: Create an account or login to access your personal library
+2. **Add Books**: Click "Add Book" to add new books to your personal collection
+3. **Browse Your Books**: View your personal book collection with search and filter options
+4. **Review Your Books**: Click on any book to view details and add personal reviews
+5. **Manage Your Collection**: Edit or delete your own books and reviews
 
 ## Environment Variables
 
@@ -194,3 +194,7 @@ This project is licensed under the MIT License.
 ## Support
 
 For support, email your-email@example.com or create an issue in the repository.
+
+---
+
+**Built with ❤️ by [Your Name]**

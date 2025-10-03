@@ -7,9 +7,9 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 
 // @route   GET /api/books
-// @desc    Get all books with pagination and filtering
-// @access  Public
-router.get('/', [
+// @desc    Get user's books with pagination and filtering
+// @access  Private
+router.get('/', protect, [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
   query('search').optional().isString().withMessage('Search must be a string'),
@@ -32,8 +32,10 @@ router.get('/', [
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    let query = {};
+    // Build query - only show books added by the current user
+    let query = {
+      addedBy: req.user.id
+    };
     
     if (search) {
       query.$or = [
@@ -95,11 +97,11 @@ router.get('/', [
 });
 
 // @route   GET /api/books/genres
-// @desc    Get all unique genres
-// @access  Public
-router.get('/genres', async (req, res) => {
+// @desc    Get unique genres from user's books
+// @access  Private
+router.get('/genres', protect, async (req, res) => {
   try {
-    const genres = await Book.distinct('genre');
+    const genres = await Book.distinct('genre', { addedBy: req.user.id });
     res.json({
       success: true,
       data: genres.sort()
@@ -114,11 +116,14 @@ router.get('/genres', async (req, res) => {
 });
 
 // @route   GET /api/books/:id
-// @desc    Get single book by ID
-// @access  Public
-router.get('/:id', async (req, res) => {
+// @desc    Get single book by ID (user's own books only)
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id).populate('addedBy', 'name email');
+    const book = await Book.findOne({ 
+      _id: req.params.id, 
+      addedBy: req.user.id 
+    }).populate('addedBy', 'name email');
     
     if (!book) {
       return res.status(404).json({

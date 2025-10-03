@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Navbar } from '@/components/Navbar';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const ITEMS_PER_PAGE = 6;
 
 export default function Home() {
+  const { user, loading: authLoading } = useAuth();
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,12 +23,16 @@ export default function Home() {
   const [genres, setGenres] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchGenres();
-  }, []);
+    if (user) {
+      fetchGenres();
+    }
+  }, [user]);
 
   useEffect(() => {
-    fetchBooks();
-  }, [currentPage, searchQuery, genreFilter]);
+    if (user) {
+      fetchBooks();
+    }
+  }, [user, currentPage, searchQuery, genreFilter]);
 
   const fetchGenres = async () => {
     try {
@@ -54,21 +61,75 @@ export default function Home() {
         params.genre = genreFilter;
       }
 
+      console.log('🔍 Fetching books with params:', params);
       const response = await booksAPI.getBooks(params);
+      console.log('📚 Books API response:', response.data);
       
       if (response.data.success) {
         setBooks(response.data.data);
         setTotalPages(response.data.pagination.totalPages);
+        console.log('✅ Books set successfully:', response.data.data);
       } else {
         throw new Error(response.data.message || 'Failed to fetch books');
       }
     } catch (error: any) {
       toast.error('Failed to load books');
-      console.error('Error fetching books:', error);
+      console.error('❌ Error fetching books:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleEditBook = (bookId: string) => {
+    window.location.href = `/books/${bookId}/edit`;
+  };
+
+  const handleDeleteBook = async (bookId: string) => {
+    if (window.confirm('Are you sure you want to delete this book?')) {
+      try {
+        await booksAPI.deleteBook(bookId);
+        toast.success('Book deleted successfully');
+        fetchBooks(); // Refresh the list
+      } catch (error: any) {
+        toast.error('Failed to delete book');
+        console.error('Error deleting book:', error);
+      }
+    }
+  };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <h1 className="text-4xl font-bold font-serif mb-4">Welcome to Your Personal Book Library</h1>
+            <p className="text-xl text-muted-foreground mb-8">
+              Sign in to manage your personal collection of books and reviews
+            </p>
+            <Link to="/auth">
+              <Button size="lg" className="text-lg px-8 py-3">
+                Sign In / Sign Up
+              </Button>
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,11 +138,17 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-12 text-center">
           <h1 className="text-5xl font-bold font-serif mb-4 gradient-primary bg-clip-text text-transparent">
-            Discover Your Next Great Read
+            Your Personal Book Library
           </h1>
-          <p className="text-xl text-muted-foreground">
-            Browse thousands of book reviews from our community
+          <p className="text-xl text-muted-foreground mb-6">
+            Manage your personal collection of books and reviews
           </p>
+          <Link to="/books/new">
+            <Button size="lg" className="text-lg px-8 py-3">
+              <Plus className="mr-2 h-5 w-5" />
+              Add New Book
+            </Button>
+          </Link>
         </div>
 
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
@@ -126,15 +193,22 @@ export default function Home() {
           </div>
         ) : books.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-xl text-muted-foreground">No books found</p>
+            <p className="text-xl text-muted-foreground mb-4">Your library is empty</p>
+            <p className="text-muted-foreground mb-6">Start building your personal book collection by adding your first book!</p>
+            <Link to="/books/new">
+              <Button size="lg">
+                <Plus className="mr-2 h-5 w-5" />
+                Add Your First Book
+              </Button>
+            </Link>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {books.map((book) => (
                 <BookCard
-                  key={book.id}
-                  id={book.id}
+                  key={book._id || book.id}
+                  id={book._id || book.id}
                   title={book.title}
                   author={book.author}
                   genre={book.genre}
@@ -142,6 +216,8 @@ export default function Home() {
                   description={book.description}
                   averageRating={book.averageRating}
                   reviewCount={book.reviewCount}
+                  onEdit={handleEditBook}
+                  onDelete={handleDeleteBook}
                 />
               ))}
             </div>

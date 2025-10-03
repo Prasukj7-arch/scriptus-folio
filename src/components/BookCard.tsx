@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { StarRating } from './StarRating';
-import { BookOpen, User, Calendar } from 'lucide-react';
+import { BookOpen, User, Calendar, Edit, Trash2 } from 'lucide-react';
 
 interface BookCardProps {
   id: string;
@@ -13,6 +14,8 @@ interface BookCardProps {
   description: string;
   averageRating?: number;
   reviewCount?: number;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function BookCard({
@@ -24,10 +27,12 @@ export function BookCard({
   description,
   averageRating = 0,
   reviewCount = 0,
+  onEdit,
+  onDelete,
 }: BookCardProps) {
   return (
     <Link to={`/books/${id}`}>
-      <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group">
+      <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group relative">
         <CardHeader className="space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
@@ -65,6 +70,39 @@ export function BookCard({
             <span>{reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}</span>
           </div>
         </CardFooter>
+        
+        {(onEdit || onDelete) && (
+          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {onEdit && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEdit(id);
+                }}
+                className="h-8 w-8 p-0"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete(id);
+                }}
+                className="h-8 w-8 p-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        )}
       </Card>
     </Link>
   );
