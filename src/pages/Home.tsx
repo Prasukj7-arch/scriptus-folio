@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { booksAPI } from '@/services/api';
 import { BookCard } from '@/components/BookCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,15 +29,10 @@ export default function Home() {
 
   const fetchGenres = async () => {
     try {
-      const { data, error } = await supabase
-        .from('books')
-        .select('genre')
-        .order('genre');
-
-      if (error) throw error;
-
-      const uniqueGenres = Array.from(new Set(data?.map(b => b.genre) || []));
-      setGenres(uniqueGenres);
+      const response = await booksAPI.getGenres();
+      if (response.data.success) {
+        setGenres(response.data.data);
+      }
     } catch (error: any) {
       console.error('Error fetching genres:', error);
     }
@@ -46,38 +41,27 @@ export default function Home() {
   const fetchBooks = async () => {
     setLoading(true);
     try {
-      let query = supabase
-        .from('books')
-        .select('*, reviews(rating)', { count: 'exact' });
+      const params: any = {
+        page: currentPage,
+        limit: ITEMS_PER_PAGE
+      };
 
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%`);
+        params.search = searchQuery;
       }
 
       if (genreFilter !== 'all') {
-        query = query.eq('genre', genreFilter);
+        params.genre = genreFilter;
       }
 
-      const { data, error, count } = await query
-        .order('created_at', { ascending: false })
-        .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
-
-      if (error) throw error;
-
-      const booksWithRatings = data?.map(book => {
-        const ratings = book.reviews?.map((r: any) => r.rating) || [];
-        const averageRating = ratings.length > 0
-          ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length
-          : 0;
-        return {
-          ...book,
-          averageRating,
-          reviewCount: ratings.length,
-        };
-      }) || [];
-
-      setBooks(booksWithRatings);
-      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+      const response = await booksAPI.getBooks(params);
+      
+      if (response.data.success) {
+        setBooks(response.data.data);
+        setTotalPages(response.data.pagination.totalPages);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch books');
+      }
     } catch (error: any) {
       toast.error('Failed to load books');
       console.error('Error fetching books:', error);
@@ -154,7 +138,7 @@ export default function Home() {
                   title={book.title}
                   author={book.author}
                   genre={book.genre}
-                  publishedYear={book.published_year}
+                  publishedYear={book.publishedYear}
                   description={book.description}
                   averageRating={book.averageRating}
                   reviewCount={book.reviewCount}

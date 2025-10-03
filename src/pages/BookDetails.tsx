@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { booksAPI, reviewsAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { StarRating } from '@/components/StarRating';
@@ -37,14 +37,14 @@ export default function BookDetails() {
 
   const fetchBookDetails = async () => {
     try {
-      const { data, error } = await supabase
-        .from('books')
-        .select('*, profiles(name)')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      setBook(data);
+      const response = await booksAPI.getBook(id!);
+      
+      if (response.data.success) {
+        setBook(response.data.data);
+        setReviews(response.data.data.reviews || []);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch book');
+      }
     } catch (error: any) {
       toast.error('Failed to load book details');
       console.error(error);
@@ -54,18 +54,8 @@ export default function BookDetails() {
   };
 
   const fetchReviews = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*, profiles(name)')
-        .eq('book_id', id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setReviews(data || []);
-    } catch (error: any) {
-      console.error('Error fetching reviews:', error);
-    }
+    // Reviews are now included in the book details response
+    // This function is kept for consistency but not used
   };
 
   const handleSubmitReview = async () => {
@@ -86,24 +76,26 @@ export default function BookDetails() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase.from('reviews').insert({
-        book_id: id,
-        user_id: user.id,
+      const response = await reviewsAPI.createReview({
+        bookId: id!,
         rating: newRating,
-        review_text: newReview.trim(),
+        reviewText: newReview.trim(),
       });
 
-      if (error) throw error;
-
-      toast.success('Review added successfully!');
-      setNewRating(0);
-      setNewReview('');
-      fetchReviews();
+      if (response.data.success) {
+        toast.success('Review added successfully!');
+        setNewRating(0);
+        setNewReview('');
+        fetchBookDetails(); // Refresh book details to get updated reviews
+      } else {
+        throw new Error(response.data.message || 'Failed to add review');
+      }
     } catch (error: any) {
-      if (error.message.includes('duplicate')) {
+      const message = error.response?.data?.message || error.message || 'Failed to add review';
+      if (message.includes('duplicate') || message.includes('already reviewed')) {
         toast.error('You have already reviewed this book');
       } else {
-        toast.error('Failed to add review');
+        toast.error(message);
       }
       console.error(error);
     } finally {
@@ -118,49 +110,55 @@ export default function BookDetails() {
     }
 
     try {
-      const { error } = await supabase
-        .from('reviews')
-        .update({
-          rating: editRating,
-          review_text: editText.trim(),
-        })
-        .eq('id', reviewId);
+      const response = await reviewsAPI.updateReview(reviewId, {
+        rating: editRating,
+        reviewText: editText.trim(),
+      });
 
-      if (error) throw error;
-
-      toast.success('Review updated successfully!');
-      setEditingReview(null);
-      fetchReviews();
+      if (response.data.success) {
+        toast.success('Review updated successfully!');
+        setEditingReview(null);
+        fetchBookDetails(); // Refresh book details to get updated reviews
+      } else {
+        throw new Error(response.data.message || 'Failed to update review');
+      }
     } catch (error: any) {
-      toast.error('Failed to update review');
+      const message = error.response?.data?.message || error.message || 'Failed to update review';
+      toast.error(message);
       console.error(error);
     }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
     try {
-      const { error } = await supabase.from('reviews').delete().eq('id', reviewId);
+      const response = await reviewsAPI.deleteReview(reviewId);
 
-      if (error) throw error;
-
-      toast.success('Review deleted successfully!');
-      fetchReviews();
+      if (response.data.success) {
+        toast.success('Review deleted successfully!');
+        fetchBookDetails(); // Refresh book details to get updated reviews
+      } else {
+        throw new Error(response.data.message || 'Failed to delete review');
+      }
     } catch (error: any) {
-      toast.error('Failed to delete review');
+      const message = error.response?.data?.message || error.message || 'Failed to delete review';
+      toast.error(message);
       console.error(error);
     }
   };
 
   const handleDeleteBook = async () => {
     try {
-      const { error } = await supabase.from('books').delete().eq('id', id);
+      const response = await booksAPI.deleteBook(id!);
 
-      if (error) throw error;
-
-      toast.success('Book deleted successfully!');
-      navigate('/');
+      if (response.data.success) {
+        toast.success('Book deleted successfully!');
+        navigate('/');
+      } else {
+        throw new Error(response.data.message || 'Failed to delete book');
+      }
     } catch (error: any) {
-      toast.error('Failed to delete book');
+      const message = error.response?.data?.message || error.message || 'Failed to delete book';
+      toast.error(message);
       console.error(error);
     }
   };
@@ -169,7 +167,7 @@ export default function BookDetails() {
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
     : 0;
 
-  const userReview = reviews.find(r => r.user_id === user?.id);
+  const userReview = reviews.find(r => r.userId === user?.id);
 
   if (loading) {
     return (
@@ -224,7 +222,7 @@ export default function BookDetails() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{book.published_year}</span>
+                        <span>{book.publishedYear}</span>
                       </div>
                     </div>
                   </div>
@@ -255,13 +253,13 @@ export default function BookDetails() {
                 <Separator />
 
                 <div className="text-sm text-muted-foreground">
-                  <p>Added by <span className="font-medium">{book.profiles?.name}</span></p>
+                  <p>Added by <span className="font-medium">{book.addedBy?.name}</span></p>
                 </div>
 
-                {user?.id === book.added_by && (
+                {user?.id === book.addedBy?._id && (
                   <div className="flex gap-2">
                     <Button asChild variant="outline">
-                      <Link to={`/books/${book.id}/edit`}>
+                      <Link to={`/books/${book._id}/edit`}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Book
                       </Link>
@@ -349,9 +347,9 @@ export default function BookDetails() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold">{review.profiles?.name}</span>
+                              <span className="font-semibold">{review.userId?.name}</span>
                               <span className="text-sm text-muted-foreground">
-                                {formatDistanceToNow(new Date(review.created_at), { addSuffix: true })}
+                                {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
                               </span>
                             </div>
                             {editingReview === review.id ? (
@@ -364,7 +362,7 @@ export default function BookDetails() {
                               <StarRating rating={review.rating} readonly size="sm" />
                             )}
                           </div>
-                          {user?.id === review.user_id && (
+                          {user?.id === review.userId?._id && (
                             <div className="flex gap-2">
                               {editingReview === review.id ? (
                                 <>
@@ -390,7 +388,7 @@ export default function BookDetails() {
                                     onClick={() => {
                                       setEditingReview(review.id);
                                       setEditRating(review.rating);
-                                      setEditText(review.review_text);
+                                      setEditText(review.reviewText);
                                     }}
                                   >
                                     <Edit className="h-4 w-4" />
@@ -434,7 +432,7 @@ export default function BookDetails() {
                           />
                         ) : (
                           <p className="text-muted-foreground leading-relaxed">
-                            {review.review_text}
+                            {review.reviewText}
                           </p>
                         )}
                       </CardContent>

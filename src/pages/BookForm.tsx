@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { booksAPI } from '@/services/api';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ const bookSchema = z.object({
   author: z.string().min(1, 'Author is required').max(100),
   description: z.string().min(10, 'Description must be at least 10 characters').max(2000),
   genre: z.string().min(1, 'Genre is required').max(50),
-  published_year: z.number().min(1000).max(new Date().getFullYear() + 1),
+  publishedYear: z.number().min(1000).max(new Date().getFullYear() + 1),
 });
 
 type BookFormData = z.infer<typeof bookSchema>;
@@ -46,24 +46,24 @@ export default function BookForm() {
 
   const fetchBook = async () => {
     try {
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const response = await booksAPI.getBook(id!);
+      
+      if (response.data.success) {
+        const book = response.data.data;
+        if (book.addedBy._id !== user?.id) {
+          toast.error('You can only edit your own books');
+          navigate('/');
+          return;
+        }
 
-      if (error) throw error;
-      if (data.added_by !== user?.id) {
-        toast.error('You can only edit your own books');
-        navigate('/');
-        return;
+        setValue('title', book.title);
+        setValue('author', book.author);
+        setValue('description', book.description);
+        setValue('genre', book.genre);
+        setValue('publishedYear', book.publishedYear);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch book');
       }
-
-      setValue('title', data.title);
-      setValue('author', data.author);
-      setValue('description', data.description);
-      setValue('genre', data.genre);
-      setValue('published_year', data.published_year);
     } catch (error: any) {
       toast.error('Failed to load book');
       navigate('/');
@@ -74,22 +74,24 @@ export default function BookForm() {
     setLoading(true);
     try {
       if (isEdit) {
-        const { error } = await supabase
-          .from('books')
-          .update(data)
-          .eq('id', id);
-        if (error) throw error;
-        toast.success('Book updated successfully!');
+        const response = await booksAPI.updateBook(id!, data);
+        if (response.data.success) {
+          toast.success('Book updated successfully!');
+        } else {
+          throw new Error(response.data.message || 'Failed to update book');
+        }
       } else {
-        const { error } = await supabase
-          .from('books')
-          .insert({ ...data, added_by: user!.id });
-        if (error) throw error;
-        toast.success('Book added successfully!');
+        const response = await booksAPI.createBook(data);
+        if (response.data.success) {
+          toast.success('Book added successfully!');
+        } else {
+          throw new Error(response.data.message || 'Failed to add book');
+        }
       }
       navigate('/');
     } catch (error: any) {
-      toast.error(isEdit ? 'Failed to update book' : 'Failed to add book');
+      const message = error.response?.data?.message || error.message || (isEdit ? 'Failed to update book' : 'Failed to add book');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -126,13 +128,13 @@ export default function BookForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="published_year">Published Year *</Label>
+                <Label htmlFor="publishedYear">Published Year *</Label>
                 <Input
-                  id="published_year"
+                  id="publishedYear"
                   type="number"
-                  {...register('published_year', { valueAsNumber: true })}
+                  {...register('publishedYear', { valueAsNumber: true })}
                 />
-                {errors.published_year && <p className="text-sm text-destructive">{errors.published_year.message}</p>}
+                {errors.publishedYear && <p className="text-sm text-destructive">{errors.publishedYear.message}</p>}
               </div>
 
               <div className="space-y-2">

@@ -1,24 +1,128 @@
-# Logs
-logs
+# -----------------------------
+# OS generated files
+# -----------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# -----------------------------
+# Dependencies
+# -----------------------------
+node_modules/
+bower_components/
+jspm_packages/
+.pnp/
+.pnp.js
+
+# -----------------------------
+# Build output
+# -----------------------------
+dist/
+build/
+out/
+coverage/
+tmp/
+temp/
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+*.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# -----------------------------
+# Java / Kotlin
+# -----------------------------
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.log
+target/
+.gradle/
+.gradle-cache/
+out/
+
+# -----------------------------
+# C/C++ / Go / Rust
+# -----------------------------
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+*.a
+*.rlib
+*.dylib
+vendor/
+
+# -----------------------------
+# Environment & Secrets
+# -----------------------------
+.env
+.env.*        # e.g. .env.development, .env.local
+*.local
+*.secret
+*.secrets
+*.enc
+*.encrypted
+*.vault
+*.key
+*.pem
+*.crt
+*.p12
+
+# -----------------------------
+# Databases
+# -----------------------------
+*.sqlite3
+*.db
+*.sql
+*.dump
+
+# -----------------------------
+# IDEs / Editors
+# -----------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# -----------------------------
+# Logs & temp
+# -----------------------------
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+*.tmp
+*.bak
+*.orig
+*.rej
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# -----------------------------
+# OS Backups
+# -----------------------------
+*.~lock.*
+*.bak
+*.tmp
+*.swp
+*.swo
+*.swn
+*.swm
