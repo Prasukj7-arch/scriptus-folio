@@ -1,6 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -13,21 +11,18 @@ import BookForm from "./pages/BookForm";
 import Profile from "./pages/Profile";
 import AllBooks from "./pages/AllBooks";
 import MyBooks from "./pages/MyBooks";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ThemeProvider>
-            <AuthProvider>
-              <FloatingBooks />
-              <Routes>
+      <Toaster />
+      <BrowserRouter>
+        <ThemeProvider>
+          <AuthProvider>
+            <FloatingBooks />
+            <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/all-books" element={<AllBooks />} />
@@ -36,12 +31,21 @@ const App = () => {
               <Route path="/books/new" element={<BookForm />} />
               <Route path="/books/:id/edit" element={<BookForm />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AuthProvider>
-          </ThemeProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+              <Route path="*" element={
+                <div className="flex min-h-screen items-center justify-center bg-background">
+                  <div className="text-center">
+                    <h1 className="mb-4 text-4xl font-bold">404</h1>
+                    <p className="mb-4 text-xl text-muted-foreground">Page not found</p>
+                    <a href="/" className="text-primary underline hover:text-primary/80">
+                      Return to Home
+                    </a>
+                  </div>
+                </div>
+              } />
+            </Routes>
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 };
