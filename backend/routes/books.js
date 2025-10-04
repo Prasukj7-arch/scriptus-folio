@@ -279,8 +279,8 @@ router.get('/my-books', protect, [
 
 // @route   GET /api/books/:id
 // @desc    Get single book by ID (accessible to all users)
-// @access  Private
-router.get('/:id', protect, async (req, res) => {
+// @access  Public
+router.get('/:id', async (req, res) => {
   try {
     const book = await Book.findById(req.params.id).populate('addedBy', 'name email');
     
