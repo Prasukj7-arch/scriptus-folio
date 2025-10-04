@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         message = error.message;
       }
       
-      toast.error(message);
+      // Don't show toast for auth errors - let the page handle it
       throw new Error(message);
     }
   };
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         message = error.message;
       }
       
-      toast.error(message);
+      // Don't show toast for auth errors - let the page handle it
       throw new Error(message);
     }
   };

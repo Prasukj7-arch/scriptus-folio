@@ -25,7 +25,8 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [signInError, setSignInError] = useState<string | null>(null);
+  const [signUpError, setSignUpError] = useState<string | null>(null);
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -37,6 +38,12 @@ export default function Auth() {
     resolver: zodResolver(signUpSchema),
   });
 
+  // Clear errors when switching tabs
+  const handleTabChange = (value: string) => {
+    setSignInError(null);
+    setSignUpError(null);
+  };
+
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -45,7 +52,8 @@ export default function Auth() {
 
   const handleSignIn = async (data: SignInFormData) => {
     setIsLoading(true);
-    setError(null);
+    setSignInError(null);
+    setSignUpError(null); // Clear signup error when switching to signin
     try {
       await signIn(data.email, data.password);
     } catch (error: any) {
@@ -53,7 +61,7 @@ export default function Auth() {
       console.error('Sign in error:', error);
       // Only set error if it's a user-friendly message
       if (error.message && !error.message.includes('Request failed with status code')) {
-        setError(error.message);
+        setSignInError(error.message);
       }
     } finally {
       setIsLoading(false);
@@ -62,7 +70,8 @@ export default function Auth() {
 
   const handleSignUp = async (data: SignUpFormData) => {
     setIsLoading(true);
-    setError(null);
+    setSignUpError(null);
+    setSignInError(null); // Clear signin error when switching to signup
     try {
       await signUp(data.email, data.password, data.name);
     } catch (error: any) {
@@ -70,7 +79,7 @@ export default function Auth() {
       console.error('Sign up error:', error);
       // Only set error if it's a user-friendly message
       if (error.message && !error.message.includes('Request failed with status code')) {
-        setError(error.message);
+        setSignUpError(error.message);
       }
     } finally {
       setIsLoading(false);
@@ -78,7 +87,7 @@ export default function Auth() {
   };
 
   // Add error boundary wrapper
-  if (error && error.includes('crash')) {
+  if ((signInError && signInError.includes('crash')) || (signUpError && signUpError.includes('crash'))) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20 relative">
         <Card className="w-full max-w-md shadow-elegant card-modern dark:card-modern-dark border-0">
@@ -112,16 +121,16 @@ export default function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue="signin" className="w-full" onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
-              {error && (
+              {signInError && (
                 <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                  <p className="text-sm text-destructive">{error}</p>
+                  <p className="text-sm text-destructive">{signInError}</p>
                 </div>
               )}
               <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
@@ -164,9 +173,9 @@ export default function Auth() {
             </TabsContent>
 
             <TabsContent value="signup">
-              {error && (
+              {signUpError && (
                 <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                  <p className="text-sm text-destructive">{error}</p>
+                  <p className="text-sm text-destructive">{signUpError}</p>
                 </div>
               )}
               <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
