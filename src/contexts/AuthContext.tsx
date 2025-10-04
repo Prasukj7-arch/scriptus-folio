@@ -83,9 +83,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(response.data.message || 'Login failed');
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Failed to sign in';
+      let message = 'Failed to sign in';
+      
+      if (error.response?.status === 401) {
+        message = 'Invalid email or password';
+      } else if (error.response?.status === 400) {
+        message = 'Please check your email and password';
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.message && !error.message.includes('Request failed with status code')) {
+        message = error.message;
+      }
+      
       toast.error(message);
-      throw error;
+      throw new Error(message);
     }
   };
 
@@ -105,9 +116,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(response.data.message || 'Registration failed');
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Failed to sign up';
+      let message = 'Failed to create account';
+      
+      if (error.response?.status === 400) {
+        message = 'Please check your information and try again';
+      } else if (error.response?.status === 409) {
+        message = 'An account with this email already exists';
+      } else if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.message && !error.message.includes('Request failed with status code')) {
+        message = error.message;
+      }
+      
       toast.error(message);
-      throw error;
+      throw new Error(message);
     }
   };
 

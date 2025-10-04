@@ -43,6 +43,23 @@ api.interceptors.response.use(
         }
       }
     }
+    
+    // Clean up error messages to be user-friendly
+    if (error.message && error.message.includes('Request failed with status code')) {
+      const status = error.response?.status;
+      if (status === 401) {
+        error.message = 'Invalid email or password';
+      } else if (status === 400) {
+        error.message = 'Please check your information';
+      } else if (status === 409) {
+        error.message = 'An account with this email already exists';
+      } else if (status === 500) {
+        error.message = 'Server error. Please try again later';
+      } else {
+        error.message = 'Something went wrong. Please try again';
+      }
+    }
+    
     return Promise.reject(error);
   }
 );

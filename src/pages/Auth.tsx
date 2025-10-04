@@ -51,7 +51,10 @@ export default function Auth() {
     } catch (error: any) {
       // Error is handled in context, but we can add additional handling here
       console.error('Sign in error:', error);
-      setError(error.message || 'Failed to sign in');
+      // Only set error if it's a user-friendly message
+      if (error.message && !error.message.includes('Request failed with status code')) {
+        setError(error.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +68,10 @@ export default function Auth() {
     } catch (error: any) {
       // Error is handled in context, but we can add additional handling here
       console.error('Sign up error:', error);
-      setError(error.message || 'Failed to sign up');
+      // Only set error if it's a user-friendly message
+      if (error.message && !error.message.includes('Request failed with status code')) {
+        setError(error.message);
+      }
     } finally {
       setIsLoading(false);
     }
