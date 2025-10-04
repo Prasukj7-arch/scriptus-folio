@@ -46,31 +46,31 @@ A full-stack MERN application where users can discover, review, and share books 
 ### Setup
 
 1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
+```bash
+git clone <your-repo-url>
    cd book-review-platform
-   ```
+```
 
 2. **Backend Setup**
-   ```bash
-   cd backend
-   npm install
+```bash
+cd backend
+npm install
    cp .env.example .env
    # Update .env with your MongoDB URI and JWT secret
-   npm run dev
-   ```
+npm run dev
+```
 
 3. **Frontend Setup**
-   ```bash
+```bash
    npm install
    cp .env.local.example .env.local
    # Update .env.local with your backend URL
-   npm run dev
-   ```
+npm run dev
+```
 
 4. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:5000
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
 
 ## 📁 Project Structure
 

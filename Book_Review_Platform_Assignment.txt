@@ -1,0 +1,75 @@
+# Book Review Platform Assignment
+
+## Fullstack MERN Assignment – Book Review Platform
+
+**Prepared by:** [Your Name]  
+**Date:** October 2, 2025  
+**Deadline:** October 5, 2025  
+**Technologies Required:** React, Node.js, MongoDB, Express, JWT, Mongoose, bcrypt  
+
+### 🎯 Objective
+Build a comprehensive Book Review Platform using the MERN stack (MongoDB, Express, React, Node.js) where users can sign up, log in, add books, and review them. This assignment tests skills in authentication, CRUD operations, and frontend integration.
+
+### 🔹 Functional Requirements
+
+#### 1. User Authentication
+- Sign up with Name, Email (unique), and Password (hashed using bcrypt).
+- Login with email and password, returning a JWT token on success.
+- Use middleware to protect API routes.
+
+#### 2. Book Management
+- Add books with Title, Author, Description, Genre, and Published Year.
+- Only the book creator can edit or delete their books.
+- All users can view a paginated book list (5 books per page).
+
+#### 3. Review System
+- Add reviews with Rating (1-5 stars) and Review Text.
+- Users can edit or delete their own reviews.
+- Display all reviews and calculate the average rating dynamically on the Book Details page.
+
+### 🔹 Technical Requirements
+- **Backend:** Node.js + Express with Mongoose schemas, bcrypt for hashing, JWT for authentication, and an MVC structure.
+- **Frontend:** React Router for navigation, Context API for state, Axios/Fetch for API calls, and Tailwind CSS/Bootstrap for styling.
+- **Database:** MongoDB Atlas with schemas for User, Book, and Review.
+
+### 🔹 Frontend Pages Required
+- **Signup Page:** Form to register new users.
+- **Login Page:** Form to log in and store JWT in localStorage.
+- **Book List Page (Home):** Displays all books with pagination.
+- **Book Details Page:** Shows book info, reviews, and average rating.
+- **Add/Edit Book Page:** Form for logged-in users to add or edit books.
+- **Profile Page (Bonus):** Displays user’s added books and reviews.
+
+### ⭐ Bonus Features (Optional but Impressive)
+- Search and filter books by title/author or genre.
+- Sort books by published year or average rating.
+- Charts showing rating distribution for a book (using Recharts).
+- Dark/Light Mode toggle.
+- Deployment of backend (Render/Heroku/AWS) and frontend (Vercel/Netlify).
+- Postman collection for APIs.
+
+### 🔹 Database Schema Design
+- **User Schema:** { name, email, password }
+- **Book Schema:** { title, author, description, genre, year, addedBy (userId ref) }
+- **Review Schema:** { bookId (ref), userId (ref), rating, reviewText }
+
+### 🔹 Deliverables
+- GitHub repository with /backend and /frontend folders.
+- README.md with setup instructions and API documentation.
+- Deployed links (bonus: Postman collection).
+
+### ✅ Evaluation Criteria
+- Code quality and folder structure.
+- Authentication and security (JWT, bcrypt).
+- API design (RESTful, proper error handling).
+- Frontend integration (React + API calls).
+- UI/UX (clean forms, lists, navigation).
+- Database schema design (relations: user ↔ book ↔ review).
+- Bonus: Deployment, charts, search/sort, dark mode.
+
+### 📝 Assignment Guidelines
+- Meet the October 5, 2025, deadline; late submissions may not be accepted.
+- Ensure code is well-documented with best practices.
+- Include a README file with setup instructions and project description.
+- Deploy the application and provide the live URL in your submission.
+- Ask questions in community channels if needed.
