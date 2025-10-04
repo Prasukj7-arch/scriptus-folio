@@ -4,8 +4,8 @@ A full-stack MERN application where users can discover, review, and share books 
 
 ## 🚀 Live Demo
 
-- **Frontend**: [https://your-frontend-url.onrender.com](https://your-frontend-url.onrender.com)
-- **Backend API**: [https://your-backend-url.onrender.com](https://your-backend-url.onrender.com)
+- **Frontend**: [https://scriptus-folio-mks6s50ax-prasukjain200005-gmailcoms-projects.vercel.app](https://scriptus-folio-mks6s50ax-prasukjain200005-gmailcoms-projects.vercel.app)
+- **Backend API**: [https://web-production-ac936.up.railway.app](https://web-production-ac936.up.railway.app)
 
 ## 🛠️ Tech Stack
 
@@ -24,44 +24,17 @@ A full-stack MERN application where users can discover, review, and share books 
 - 🌙 Dark/Light mode toggle
 - 📱 Responsive design
 
-## 🚀 Deployment on Render
+## 🚀 Deployment
 
-### Backend Deployment
+### Backend on Railway
+- **Platform**: Railway
+- **URL**: https://web-production-ac936.up.railway.app
+- **Environment Variables**: MONGODB_URI, JWT_SECRET, NODE_ENV
 
-1. **Create a new Web Service on Render**
-   - Connect your GitHub repository
-   - Choose "Web Service"
-   - Set the following:
-     - **Name**: `book-review-backend`
-     - **Root Directory**: `backend`
-     - **Environment**: `Node`
-     - **Build Command**: `npm install`
-     - **Start Command**: `npm start`
-
-2. **Environment Variables**
-   Add these in Render dashboard:
-   ```
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/bookreview?retryWrites=true&w=majority
-   JWT_SECRET=your-super-secret-jwt-key-here
-   NODE_ENV=production
-   ```
-
-### Frontend Deployment
-
-1. **Create a new Static Site on Render**
-   - Connect your GitHub repository
-   - Choose "Static Site"
-   - Set the following:
-     - **Name**: `book-review-frontend`
-     - **Root Directory**: `(leave empty)`
-     - **Build Command**: `npm install && npm run build`
-     - **Publish Directory**: `dist`
-
-2. **Environment Variables**
-   Add this in Render dashboard:
-   ```
-   VITE_API_URL=https://your-backend-url.onrender.com/api
-   ```
+### Frontend on Vercel
+- **Platform**: Vercel
+- **URL**: https://scriptus-folio-mks6s50ax-prasukjain200005-gmailcoms-projects.vercel.app
+- **Environment Variables**: VITE_API_URL
 
 ## 🔧 Local Development
 
