@@ -11,6 +11,8 @@ import Auth from "./pages/Auth";
 import BookDetails from "./pages/BookDetails";
 import BookForm from "./pages/BookForm";
 import Profile from "./pages/Profile";
+import AllBooks from "./pages/AllBooks";
+import MyBooks from "./pages/MyBooks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => {
               <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/all-books" element={<AllBooks />} />
+              <Route path="/my-books" element={<MyBooks />} />
               <Route path="/books/:id" element={<BookDetails />} />
               <Route path="/books/new" element={<BookForm />} />
               <Route path="/books/:id/edit" element={<BookForm />} />

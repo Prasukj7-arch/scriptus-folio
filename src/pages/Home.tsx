@@ -1,119 +1,23 @@
-import { useState, useEffect } from 'react';
-import { booksAPI } from '@/services/api';
-import { BookCard } from '@/components/BookCard';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Navbar } from '@/components/Navbar';
-import { Search, ChevronLeft, ChevronRight, Plus, BookOpen, User, ArrowUpDown } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
-
-const ITEMS_PER_PAGE = 5; // Changed to 5 as per requirements
+import { useAuth } from '@/contexts/AuthContext';
+import { Navbar } from '@/components/Navbar';
+import { Button } from '@/components/ui/button';
+import { BookOpen, User, Plus, Star, MessageSquare, Heart } from 'lucide-react';
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
-  const [books, setBooks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [genreFilter, setGenreFilter] = useState<string>('all');
-  const [genres, setGenres] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
-  const [sortBy, setSortBy] = useState<string>('newest');
-
-  useEffect(() => {
-    if (user) {
-      fetchGenres();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      fetchBooks();
-    }
-  }, [user, currentPage, searchQuery, genreFilter, activeTab, sortBy]);
-
-  const fetchGenres = async () => {
-    try {
-      const response = await booksAPI.getGenres();
-      if (response.data.success) {
-        setGenres(response.data.data);
-      }
-    } catch (error: any) {
-      console.error('Error fetching genres:', error);
-    }
-  };
-
-  const fetchBooks = async () => {
-    setLoading(true);
-    try {
-      const params: any = {
-        page: currentPage,
-        limit: ITEMS_PER_PAGE
-      };
-
-      if (searchQuery) {
-        params.search = searchQuery;
-      }
-
-      if (genreFilter !== 'all') {
-        params.genre = genreFilter;
-      }
-
-      if (sortBy !== 'newest') {
-        params.sortBy = sortBy;
-      }
-
-      console.log('🔍 Fetching books with params:', params);
-      const response = activeTab === 'all' 
-        ? await booksAPI.getBooks(params)
-        : await booksAPI.getMyBooks(params);
-      console.log('📚 Books API response:', response.data);
-      
-      if (response.data.success) {
-        setBooks(response.data.data);
-        setTotalPages(response.data.pagination.totalPages);
-        console.log('✅ Books set successfully:', response.data.data);
-      } else {
-        throw new Error(response.data.message || 'Failed to fetch books');
-      }
-    } catch (error: any) {
-      toast.error('Failed to load books');
-      console.error('❌ Error fetching books:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditBook = (bookId: string) => {
-    window.location.href = `/books/${bookId}/edit`;
-  };
-
-  const handleDeleteBook = async (bookId: string) => {
-    if (window.confirm('Are you sure you want to delete this book?')) {
-      try {
-        await booksAPI.deleteBook(bookId);
-        toast.success('Book deleted successfully');
-        fetchBooks(); // Refresh the list
-      } catch (error: any) {
-        toast.error('Failed to delete book');
-        console.error('Error deleting book:', error);
-      }
-    }
-  };
 
   // Show loading while checking authentication
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8 relative z-10">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-muted rounded w-1/3" />
+            <div className="h-64 bg-muted rounded" />
+          </div>
+        </main>
       </div>
     );
   }
@@ -121,16 +25,22 @@ export default function Home() {
   // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
         <Navbar />
-        <main className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <h1 className="text-4xl font-bold font-serif mb-4">Welcome to BookReview Platform</h1>
-            <p className="text-xl text-muted-foreground mb-8">
+        <main className="container mx-auto px-4 py-8 relative z-10">
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full gradient-primary mb-8 shadow-xl">
+              <BookOpen className="h-12 w-12 text-primary-foreground" />
+            </div>
+            <h1 className="text-5xl sm:text-6xl font-bold font-serif mb-6 gradient-text-animated">
+              Welcome to BookReview Platform
+            </h1>
+            <p className="text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
               Sign in to discover, review, and share your favorite books with the community
             </p>
             <Link to="/auth">
-              <Button size="lg" className="text-lg px-8 py-3">
+              <Button size="lg" className="text-xl px-16 py-8 gradient-primary hover-lift shadow-2xl font-semibold">
+                <User className="mr-4 h-6 w-6" />
                 Sign In / Sign Up
               </Button>
             </Link>
@@ -145,286 +55,86 @@ export default function Home() {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 relative z-10">
-        <div className="mb-8 sm:mb-12 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold font-serif mb-6 gradient-text-animated">
+        {/* Hero Section */}
+        <div className="mb-20 text-center">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full gradient-primary mb-8 shadow-xl">
+            <BookOpen className="h-12 w-12 text-primary-foreground" />
+          </div>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-serif mb-8 gradient-text-animated">
             Book Review Platform
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground mb-8 px-4 max-w-3xl mx-auto leading-relaxed">
-            Discover amazing books, share your reviews, and connect with fellow book lovers in our vibrant community
+          <p className="text-2xl sm:text-3xl text-muted-foreground mb-12 px-4 max-w-5xl mx-auto leading-relaxed">
+            Discover amazing books, share your reviews, and connect with fellow book lovers
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          
+          {/* Quick Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <Link to="/all-books">
+              <Button size="lg" className="text-xl px-16 py-8 hover-lift gradient-primary shadow-2xl font-semibold">
+                <BookOpen className="mr-4 h-6 w-6" />
+                Browse All Books
+              </Button>
+            </Link>
+            <Link to="/my-books">
+              <Button size="lg" variant="outline" className="text-xl px-16 py-8 hover-lift glass font-semibold">
+                <User className="mr-4 h-6 w-6" />
+                My Books
+              </Button>
+            </Link>
             <Link to="/books/new">
-              <Button size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-4 hover-lift gradient-primary shadow-lg">
-                <Plus className="mr-2 h-5 w-5" />
+              <Button size="lg" className="text-xl px-16 py-8 hover-lift gradient-primary shadow-2xl font-semibold">
+                <Plus className="mr-4 h-6 w-6" />
                 Add New Book
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-4 hover-lift glass">
-              <BookOpen className="mr-2 h-5 w-5" />
-              Explore Books
-            </Button>
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(value) => {
-          setActiveTab(value as 'all' | 'my');
-          setCurrentPage(1);
-        }} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="all" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              All Books
-            </TabsTrigger>
-            <TabsTrigger value="my" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              My Books
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="space-y-6">
-            <div className="mb-6 sm:mb-8 flex flex-col gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by title or author..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-10"
-                />
+        {/* Features Section */}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="text-center p-8 bg-card/30 backdrop-blur-sm rounded-xl border border-border/50 hover-lift">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <BookOpen className="h-8 w-8 text-primary" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Select
-                  value={genreFilter}
-                  onValueChange={(value) => {
-                    setGenreFilter(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Filter by genre" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Genres</SelectItem>
-                    {genres.map((genre) => (
-                      <SelectItem key={genre} value={genre}>
-                        {genre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => {
-                    setSortBy(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest First</SelectItem>
-                    <SelectItem value="oldest">Oldest First</SelectItem>
-                    <SelectItem value="year-desc">Year (Newest)</SelectItem>
-                    <SelectItem value="year-asc">Year (Oldest)</SelectItem>
-                    <SelectItem value="rating-desc">Highest Rated</SelectItem>
-                    <SelectItem value="rating-asc">Lowest Rated</SelectItem>
-                    <SelectItem value="title-asc">Title A-Z</SelectItem>
-                    <SelectItem value="title-desc">Title Z-A</SelectItem>
-                  </SelectContent>
-                </Select>
+              <h3 className="text-2xl font-bold mb-2">Discover Books</h3>
+              <p className="text-muted-foreground">Explore our vast collection of books from various genres and authors</p>
+            </div>
+            <div className="text-center p-8 bg-card/30 backdrop-blur-sm rounded-xl border border-border/50 hover-lift">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <Star className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Share Reviews</h3>
+              <p className="text-muted-foreground">Share your thoughts and read reviews from fellow book enthusiasts</p>
+            </div>
+            <div className="text-center p-8 bg-card/30 backdrop-blur-sm rounded-xl border border-border/50 hover-lift">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <Plus className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Build Collection</h3>
+              <p className="text-muted-foreground">Add your favorite books and build your personal digital library</p>
+            </div>
+          </div>
+
+          {/* Community Stats */}
+          <div className="text-center py-16">
+            <h2 className="text-4xl font-bold font-serif mb-8 gradient-text-animated">Join Our Community</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div className="p-6 bg-card/20 backdrop-blur-sm rounded-xl border border-border/30">
+                <div className="text-3xl font-bold text-primary mb-2">1000+</div>
+                <div className="text-muted-foreground">Books Available</div>
+              </div>
+              <div className="p-6 bg-card/20 backdrop-blur-sm rounded-xl border border-border/30">
+                <div className="text-3xl font-bold text-primary mb-2">500+</div>
+                <div className="text-muted-foreground">Active Users</div>
+              </div>
+              <div className="p-6 bg-card/20 backdrop-blur-sm rounded-xl border border-border/30">
+                <div className="text-3xl font-bold text-primary mb-2">2000+</div>
+                <div className="text-muted-foreground">Reviews Shared</div>
               </div>
             </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
-                ))}
-              </div>
-            ) : books.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-xl text-muted-foreground mb-4">No books found</p>
-                <p className="text-muted-foreground mb-6">Be the first to add a book to the platform!</p>
-                <Link to="/books/new">
-                  <Button size="lg">
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add First Book
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {books.map((book) => (
-                    <BookCard
-                      key={book._id || book.id}
-                      id={book._id || book.id}
-                      title={book.title}
-                      author={book.author}
-                      genre={book.genre}
-                      publishedYear={book.publishedYear}
-                      description={book.description}
-                      averageRating={book.averageRating}
-                      reviewCount={book.reviewCount}
-                      addedBy={book.addedBy}
-                      currentUserId={user?.id}
-                    />
-                  ))}
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="mt-8 flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </TabsContent>
-
-          <TabsContent value="my" className="space-y-6">
-            <div className="mb-8 flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search your books..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-10"
-                />
-              </div>
-              <Select
-                value={genreFilter}
-                onValueChange={(value) => {
-                  setGenreFilter(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Filter by genre" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Genres</SelectItem>
-                  {genres.map((genre) => (
-                    <SelectItem key={genre} value={genre}>
-                      {genre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={sortBy}
-                onValueChange={(value) => {
-                  setSortBy(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="year-desc">Year (Newest)</SelectItem>
-                  <SelectItem value="year-asc">Year (Oldest)</SelectItem>
-                  <SelectItem value="rating-desc">Highest Rated</SelectItem>
-                  <SelectItem value="rating-asc">Lowest Rated</SelectItem>
-                  <SelectItem value="title-asc">Title A-Z</SelectItem>
-                  <SelectItem value="title-desc">Title Z-A</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
-                ))}
-              </div>
-            ) : books.length === 0 ? (
-              <div className="text-center py-12">
-            <p className="text-xl text-muted-foreground mb-4">No books in your collection yet</p>
-            <p className="text-muted-foreground mb-6">Start building your book collection by adding your first book!</p>
-                <Link to="/books/new">
-                  <Button size="lg">
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add Your First Book
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {books.map((book) => (
-                    <BookCard
-                      key={book._id || book.id}
-                      id={book._id || book.id}
-                      title={book.title}
-                      author={book.author}
-                      genre={book.genre}
-                      publishedYear={book.publishedYear}
-                      description={book.description}
-                      averageRating={book.averageRating}
-                      reviewCount={book.reviewCount}
-                      addedBy={book.addedBy}
-                      currentUserId={user?.id}
-                      onEdit={handleEditBook}
-                      onDelete={handleDeleteBook}
-                    />
-                  ))}
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="mt-8 flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </main>
     </div>
   );

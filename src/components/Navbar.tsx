@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Plus, LogIn, LogOut, User, Menu, X } from 'lucide-react';
+import { BookOpen, Plus, LogIn, LogOut, User, Menu, X, Library, BookMarked } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -36,6 +36,18 @@ export function Navbar() {
             <ThemeToggle />
             {user ? (
               <>
+                <Link to="/all-books">
+                  <Button variant="ghost" className="hover-lift">
+                    <Library className="h-4 w-4 mr-2" />
+                    All Books
+                  </Button>
+                </Link>
+                <Link to="/my-books">
+                  <Button variant="ghost" className="hover-lift">
+                    <BookMarked className="h-4 w-4 mr-2" />
+                    My Books
+                  </Button>
+                </Link>
                 <Button
                   onClick={() => navigate('/books/new')}
                   className="gradient-primary hover:opacity-90 transition-smooth"
@@ -92,6 +104,28 @@ export function Navbar() {
             <div className="flex flex-col space-y-3">
               {user ? (
                 <>
+                  <Button
+                    onClick={() => {
+                      navigate('/all-books');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start"
+                  >
+                    <Library className="h-4 w-4 mr-2" />
+                    All Books
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      navigate('/my-books');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start"
+                  >
+                    <BookMarked className="h-4 w-4 mr-2" />
+                    My Books
+                  </Button>
                   <Button
                     onClick={() => {
                       navigate('/books/new');
