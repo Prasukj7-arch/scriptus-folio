@@ -20,7 +20,11 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://scriptus-folio.vercel.app', 'https://*.vercel.app'] 
+    ? [
+        'https://scriptus-folio.vercel.app', 
+        'https://scriptus-folio-mks6s50ax-prasukjain200005-gmailcoms-projects.vercel.app',
+        'https://*.vercel.app'
+      ] 
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081'],
   credentials: true
 }));
