@@ -25,6 +25,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -44,10 +45,13 @@ export default function Auth() {
 
   const handleSignIn = async (data: SignInFormData) => {
     setIsLoading(true);
+    setError(null);
     try {
       await signIn(data.email, data.password);
-    } catch (error) {
-      // Error handled in context
+    } catch (error: any) {
+      // Error is handled in context, but we can add additional handling here
+      console.error('Sign in error:', error);
+      setError(error.message || 'Failed to sign in');
     } finally {
       setIsLoading(false);
     }
@@ -55,14 +59,32 @@ export default function Auth() {
 
   const handleSignUp = async (data: SignUpFormData) => {
     setIsLoading(true);
+    setError(null);
     try {
       await signUp(data.email, data.password, data.name);
-    } catch (error) {
-      // Error handled in context
+    } catch (error: any) {
+      // Error is handled in context, but we can add additional handling here
+      console.error('Sign up error:', error);
+      setError(error.message || 'Failed to sign up');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Add error boundary wrapper
+  if (error && error.includes('crash')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20 relative">
+        <Card className="w-full max-w-md shadow-elegant card-modern dark:card-modern-dark border-0">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-bold mb-4">Something went wrong</h2>
+            <p className="text-muted-foreground mb-4">Please refresh the page and try again.</p>
+            <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20 relative">
@@ -91,6 +113,11 @@ export default function Auth() {
             </TabsList>
 
             <TabsContent value="signin">
+              {error && (
+                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
               <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
@@ -131,6 +158,11 @@ export default function Auth() {
             </TabsContent>
 
             <TabsContent value="signup">
+              {error && (
+                <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
+              )}
               <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Name</Label>
