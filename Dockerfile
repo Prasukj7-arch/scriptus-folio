@@ -10,7 +10,7 @@ COPY backend/package*.json ./backend/
 
 # Install dependencies
 RUN npm install
-RUN cd backend && npm install
+RUN npm install --prefix backend
 
 # Copy source code
 COPY . .
