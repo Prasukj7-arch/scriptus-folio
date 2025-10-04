@@ -10,13 +10,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "dev:frontend": "npm run dev",
-    "dev:backend": "cd backend && npm run dev",
+    "dev:backend": "npm run dev --prefix backend",
     "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "backend:install": "cd backend && npm install",
-    "start": "cd backend && npm start",
-    "postinstall": "cd backend && npm install",
-    "railway:build": "cd backend && npm install",
-    "railway:start": "cd backend && npm start"
+    "backend:install": "npm install --prefix backend",
+    "start": "npm start --prefix backend",
+    "postinstall": "npm install --prefix backend",
+    "railway:build": "npm install --prefix backend",
+    "railway:start": "npm start --prefix backend"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
