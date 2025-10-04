@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ChevronLeft, ChevronRight, Search, BookOpen, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
-const ITEMS_PER_PAGE = 12; // Increased for dedicated page
+const ITEMS_PER_PAGE = 5; // 5 books per page as per assignment requirements
 
 export default function AllBooks() {
   const { user, loading: authLoading } = useAuth();
@@ -105,7 +105,7 @@ export default function AllBooks() {
       <main className="container mx-auto px-4 py-8 relative z-10">
 
         {/* Search and Filter Section */}
-        <div className="bg-card/30 backdrop-blur-sm rounded-xl p-6 border-2 border-border/60 mb-8">
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl p-6 border-2 border-border mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -116,7 +116,7 @@ export default function AllBooks() {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-12 h-12 text-base bg-background/50 border-border focus:border-primary"
+                className="pl-12 h-12 text-base bg-background/80 border-border focus:border-primary"
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4 lg:w-96">
@@ -127,7 +127,7 @@ export default function AllBooks() {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="h-12 bg-background/50 border-border focus:border-primary">
+                <SelectTrigger className="h-12 bg-background/80 border-border focus:border-primary">
                   <SelectValue placeholder="All Genres" />
                 </SelectTrigger>
                 <SelectContent>
@@ -146,7 +146,7 @@ export default function AllBooks() {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="h-12 bg-background/50 border-border focus:border-primary">
+                <SelectTrigger className="h-12 bg-background/80 border-border focus:border-primary">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -203,6 +203,7 @@ export default function AllBooks() {
                   reviewCount={book.reviewCount}
                   addedBy={book.addedBy}
                   currentUserId={user?.id}
+                  source="all-books"
                 />
               ))}
             </div>

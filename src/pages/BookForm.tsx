@@ -100,68 +100,85 @@ export default function BookForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
-        <Card className="shadow-elegant hover-lift card-modern dark:card-modern-dark border-0">
-          <CardHeader>
-            <CardTitle className="text-3xl font-serif">
-              {isEdit ? 'Edit Book' : 'Add New Book'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input id="title" {...register('title')} />
-                {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-              </div>
+      <main className="container mx-auto px-4 py-8 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-elegant card-modern dark:card-modern-dark border-0">
+            <CardHeader className="text-center pb-8">
+              
+            </CardHeader>
+            <CardContent className="px-8 pb-8">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="text-base font-medium">Title *</Label>
+                    <Input id="title" {...register('title')} className="h-12 text-base" />
+                    {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="author">Author *</Label>
-                <Input id="author" {...register('author')} />
-                {errors.author && <p className="text-sm text-destructive">{errors.author.message}</p>}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="author" className="text-base font-medium">Author *</Label>
+                    <Input id="author" {...register('author')} className="h-12 text-base" />
+                    {errors.author && <p className="text-sm text-destructive">{errors.author.message}</p>}
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="genre">Genre *</Label>
-                <Input id="genre" placeholder="e.g., Fiction, Mystery, Romance, Science Fiction" {...register('genre')} />
-                {errors.genre && <p className="text-sm text-destructive">{errors.genre.message}</p>}
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="genre" className="text-base font-medium">Genre *</Label>
+                    <Input 
+                      id="genre" 
+                      placeholder="e.g., Fiction, Mystery, Romance, Science Fiction" 
+                      {...register('genre')} 
+                      className="h-12 text-base"
+                    />
+                    {errors.genre && <p className="text-sm text-destructive">{errors.genre.message}</p>}
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="publishedYear">Published Year *</Label>
-                <Input
-                  id="publishedYear"
-                  type="number"
-                  {...register('publishedYear', { valueAsNumber: true })}
-                />
-                {errors.publishedYear && <p className="text-sm text-destructive">{errors.publishedYear.message}</p>}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="publishedYear" className="text-base font-medium">Published Year *</Label>
+                    <Input
+                      id="publishedYear"
+                      type="number"
+                      {...register('publishedYear', { valueAsNumber: true })}
+                      className="h-12 text-base"
+                    />
+                    {errors.publishedYear && <p className="text-sm text-destructive">{errors.publishedYear.message}</p>}
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  rows={6}
-                  {...register('description')}
-                />
-                {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-base font-medium">Description *</Label>
+                  <Textarea
+                    id="description"
+                    rows={8}
+                    {...register('description')}
+                    className="resize-none text-base"
+                    placeholder="Write a compelling description of the book..."
+                  />
+                  {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+                </div>
 
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="gradient-primary hover:opacity-90 flex-1"
-                >
-                  {loading ? 'Saving...' : isEdit ? 'Update Book' : 'Add Book'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="flex gap-4 pt-6">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="gradient-primary hover:opacity-90 flex-1 h-14 text-lg"
+                  >
+                    {loading ? 'Saving...' : isEdit ? 'Update Book' : 'Add Book'}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => navigate(-1)}
+                    className="h-14 px-8 text-lg"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

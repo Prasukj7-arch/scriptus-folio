@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ChevronLeft, ChevronRight, Search, User, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 5; // 5 books per page as per assignment requirements
 
 export default function MyBooks() {
   const { user, loading: authLoading } = useAuth();
@@ -19,13 +19,27 @@ export default function MyBooks() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [genreFilter, setGenreFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [genres, setGenres] = useState<string[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchBooks();
+      fetchGenres();
     }
-  }, [user, currentPage, searchQuery, sortBy]);
+  }, [user, currentPage, searchQuery, genreFilter, sortBy]);
+
+  const fetchGenres = async () => {
+    try {
+      const response = await booksAPI.getGenres();
+      if (response.data.success) {
+        setGenres(response.data.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching genres:', error);
+    }
+  };
 
   const fetchBooks = async () => {
     setLoading(true);
@@ -37,6 +51,10 @@ export default function MyBooks() {
 
       if (searchQuery) {
         params.search = searchQuery;
+      }
+
+      if (genreFilter !== 'all') {
+        params.genre = genreFilter;
       }
 
       if (sortBy !== 'newest') {
@@ -104,21 +122,40 @@ export default function MyBooks() {
       <main className="container mx-auto px-4 py-8 relative z-10">
 
         {/* Search and Filter Section */}
-        <div className="bg-card/30 backdrop-blur-sm rounded-xl p-6 border-2 border-border/60 mb-8">
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl p-6 border-2 border-border mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search your books..."
+                placeholder="Search by title or author..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-12 h-12 text-base bg-background/50 border-border focus:border-primary"
+                className="pl-12 h-12 text-base bg-background/80 border-border focus:border-primary"
               />
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 lg:w-80">
+            <div className="flex flex-col sm:flex-row gap-4 lg:w-96">
+              <Select
+                value={genreFilter}
+                onValueChange={(value) => {
+                  setGenreFilter(value);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="h-12 bg-background/80 border-border focus:border-primary">
+                  <SelectValue placeholder="All Genres" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Genres</SelectItem>
+                  {genres.map((genre) => (
+                    <SelectItem key={genre} value={genre}>
+                      {genre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select
                 value={sortBy}
                 onValueChange={(value) => {
@@ -126,7 +163,7 @@ export default function MyBooks() {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="h-12 bg-background/50 border-border focus:border-primary">
+                <SelectTrigger className="h-12 bg-background/80 border-border focus:border-primary">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -186,8 +223,7 @@ export default function MyBooks() {
                   reviewCount={book.reviewCount}
                   addedBy={book.addedBy}
                   currentUserId={user?.id}
-                  onEdit={handleEditBook}
-                  onDelete={handleDeleteBook}
+                  source="my-books"
                 />
               ))}
             </div>

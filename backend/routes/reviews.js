@@ -6,6 +6,11 @@ import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Test endpoint
+router.get('/test', (req, res) => {
+  res.json({ message: 'Reviews API is working', timestamp: new Date().toISOString() });
+});
+
 // @route   POST /api/reviews
 // @desc    Create or update review
 // @access  Private
@@ -15,6 +20,12 @@ router.post('/', protect, [
   body('reviewText').trim().isLength({ min: 1, max: 500 }).withMessage('Review text is required and must be less than 500 characters')
 ], async (req, res) => {
   try {
+    console.log('🚀 POST /api/reviews - Request received:', {
+      body: req.body,
+      user: req.user?.id,
+      timestamp: new Date().toISOString()
+    });
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -43,34 +54,15 @@ router.post('/', protect, [
       });
     }
 
-    // Check if user already reviewed this book
-    const existingReview = await Review.findOne({
-      bookId,
-      userId: req.user._id
-    });
-
-    if (existingReview) {
-      // Update existing review
-      const updatedReview = await Review.findByIdAndUpdate(
-        existingReview._id,
-        { rating, reviewText },
-        { new: true, runValidators: true }
-      ).populate('userId', 'name');
-
-      return res.json({
-        success: true,
-        message: 'Review updated successfully',
-        data: updatedReview
-      });
-    }
-
-    // Create new review
+    // Allow multiple reviews from the same user on the same book
+    console.log('🆕 Creating new review');
     const review = await Review.create({
       bookId,
       userId: req.user._id,
       rating,
       reviewText
     });
+    console.log('✅ New review created with ID:', review._id);
 
     const populatedReview = await Review.findById(review._id).populate('userId', 'name');
 
@@ -81,9 +73,17 @@ router.post('/', protect, [
     });
   } catch (error) {
     console.error('Create review error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      keyPattern: error.keyPattern,
+      keyValue: error.keyValue
+    });
     res.status(500).json({
       success: false,
-      message: 'Server error while creating review'
+      message: 'Server error while creating review',
+      error: error.message
     });
   }
 });
@@ -184,9 +184,13 @@ router.delete('/:id', protect, async (req, res) => {
 // @access  Public
 router.get('/book/:bookId', async (req, res) => {
   try {
+    console.log('🔍 Fetching reviews for book:', req.params.bookId);
     const reviews = await Review.find({ bookId: req.params.bookId })
       .populate('userId', 'name')
       .sort({ createdAt: -1 });
+
+    console.log('📝 Found reviews:', reviews.length, 'reviews');
+    console.log('📋 Review IDs:', reviews.map(r => r._id));
 
     res.json({
       success: true,
@@ -249,20 +253,7 @@ router.get('/can-review/:bookId', protect, async (req, res) => {
       });
     }
 
-    // Check if user already reviewed this book
-    const existingReview = await Review.findOne({
-      bookId: req.params.bookId,
-      userId: req.user._id
-    });
-
-    if (existingReview) {
-      return res.json({
-        success: true,
-        canReview: false,
-        reason: 'You have already reviewed this book',
-        existingReview: existingReview._id
-      });
-    }
+    // Allow multiple reviews from the same user on the same book
 
     res.json({
       success: true,

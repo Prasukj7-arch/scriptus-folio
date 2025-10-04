@@ -88,7 +88,7 @@ router.get('/', protect, [
     const totalPages = Math.ceil(totalBooks / limit);
 
     // Get average ratings and review counts for each book
-    const booksWithRatings = await Promise.all(
+    let booksWithRatings = await Promise.all(
       books.map(async (book) => {
         const reviews = await Review.find({ bookId: book._id });
         const ratings = reviews.map(review => review.rating);
@@ -103,6 +103,13 @@ router.get('/', protect, [
         };
       })
     );
+
+    // Sort by rating if requested
+    if (req.query.sortBy === 'rating-desc') {
+      booksWithRatings.sort((a, b) => b.averageRating - a.averageRating);
+    } else if (req.query.sortBy === 'rating-asc') {
+      booksWithRatings.sort((a, b) => a.averageRating - b.averageRating);
+    }
 
     res.json({
       success: true,
@@ -185,10 +192,40 @@ router.get('/my-books', protect, [
       query.genre = genre;
     }
 
+    // Determine sort order
+    let sortOrder = { createdAt: -1 }; // Default: newest first
+    
+    if (req.query.sortBy) {
+      switch (req.query.sortBy) {
+        case 'oldest':
+          sortOrder = { createdAt: 1 };
+          break;
+        case 'year-desc':
+          sortOrder = { publishedYear: -1 };
+          break;
+        case 'year-asc':
+          sortOrder = { publishedYear: 1 };
+          break;
+        case 'title-asc':
+          sortOrder = { title: 1 };
+          break;
+        case 'title-desc':
+          sortOrder = { title: -1 };
+          break;
+        case 'rating-desc':
+        case 'rating-asc':
+          // For rating sorting, we'll sort after getting the data
+          sortOrder = { createdAt: -1 };
+          break;
+        default:
+          sortOrder = { createdAt: -1 };
+      }
+    }
+
     // Get books with pagination
-    const books = await Book.find(query)
+    let books = await Book.find(query)
       .populate('addedBy', 'name email')
-      .sort({ createdAt: -1 })
+      .sort(sortOrder)
       .skip(skip)
       .limit(limit);
 
@@ -197,7 +234,7 @@ router.get('/my-books', protect, [
     const totalPages = Math.ceil(totalBooks / limit);
 
     // Get average ratings and review counts for each book
-    const booksWithRatings = await Promise.all(
+    let booksWithRatings = await Promise.all(
       books.map(async (book) => {
         const reviews = await Review.find({ bookId: book._id });
         const ratings = reviews.map(review => review.rating);
@@ -212,6 +249,13 @@ router.get('/my-books', protect, [
         };
       })
     );
+
+    // Sort by rating if requested
+    if (req.query.sortBy === 'rating-desc') {
+      booksWithRatings.sort((a, b) => b.averageRating - a.averageRating);
+    } else if (req.query.sortBy === 'rating-asc') {
+      booksWithRatings.sort((a, b) => a.averageRating - b.averageRating);
+    }
 
     res.json({
       success: true,

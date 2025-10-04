@@ -141,8 +141,7 @@ export default function Profile() {
               <User className="h-8 w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold font-serif">{user.name}</h1>
-              <p className="text-muted-foreground">{user.email}</p>
+              <h1 className="text-4xl font-bold font-serif">{user.name} ({user.email})</h1>
             </div>
           </div>
         </div>
@@ -188,8 +187,6 @@ export default function Profile() {
                       reviewCount={book.reviewCount}
                       addedBy={book.addedBy}
                       currentUserId={user.id}
-                      onEdit={handleEditBook}
-                      onDelete={handleDeleteBook}
                     />
                   ))}
                 </div>
@@ -250,7 +247,7 @@ export default function Profile() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <Link 
-                                to={`/books/${review.bookId._id}`}
+                                to={`/books/${review.bookId._id}?source=profile`}
                                 className="font-semibold hover:text-primary transition-colors"
                               >
                                 {review.bookId.title}

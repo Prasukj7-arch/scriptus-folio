@@ -27,7 +27,7 @@ const reviewSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Ensure one review per user per book
-reviewSchema.index({ bookId: 1, userId: 1 }, { unique: true });
+// Allow multiple reviews per user per book
+// No unique constraint needed
 
 export default mongoose.model('Review', reviewSchema);

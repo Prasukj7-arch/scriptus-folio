@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { StarRating } from './StarRating';
-import { BookOpen, User, Calendar, Edit, Trash2 } from 'lucide-react';
+import { BookOpen, User, Calendar } from 'lucide-react';
 
 interface BookCardProps {
   id: string;
@@ -20,8 +19,7 @@ interface BookCardProps {
     email: string;
   };
   currentUserId?: string;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  source?: string;
 }
 
 export function BookCard({
@@ -35,13 +33,11 @@ export function BookCard({
   reviewCount = 0,
   addedBy,
   currentUserId,
-  onEdit,
-  onDelete,
+  source,
 }: BookCardProps) {
-  const isOwner = addedBy && currentUserId && addedBy._id === currentUserId;
   return (
-    <Link to={`/books/${id}`}>
-      <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group relative hover-lift card-modern dark:card-modern-dark border-0">
+    <Link to={`/books/${id}${source ? `?source=${source}` : ''}`}>
+      <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group relative hover-lift card-modern dark:card-modern-dark border border-border/40">
         <CardHeader className="space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
@@ -65,14 +61,14 @@ export function BookCard({
           </div>
           {addedBy && (
             <div className="text-xs text-muted-foreground">
-              Added by {addedBy.name}
+              Added by {addedBy.name} ({addedBy.email})
             </div>
           )}
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-1 overflow-hidden text-ellipsis whitespace-nowrap">{description}</p>
         </CardContent>
-        <CardFooter className="flex items-center justify-between">
+        <CardFooter className="flex items-center justify-between pt-4">
           <div className="flex items-center gap-2">
             <StarRating rating={Math.round(averageRating)} readonly size="sm" />
             <span className="text-sm text-muted-foreground">
@@ -84,39 +80,6 @@ export function BookCard({
             <span>{reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}</span>
           </div>
         </CardFooter>
-        
-        {isOwner && (onEdit || onDelete) && (
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {onEdit && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onEdit(id);
-                }}
-                className="h-8 w-8 p-0"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete(id);
-                }}
-                className="h-8 w-8 p-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        )}
       </Card>
     </Link>
   );

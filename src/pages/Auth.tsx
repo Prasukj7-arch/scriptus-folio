@@ -80,7 +80,7 @@ export default function Auth() {
             backgroundClip: 'text'
           }}>Welcome to BookReview Platform</CardTitle>
           <CardDescription>
-            Join our community of book lovers to share and discover great reads
+            
           </CardDescription>
         </CardHeader>
         <CardContent>

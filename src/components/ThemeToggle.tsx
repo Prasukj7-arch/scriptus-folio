@@ -40,10 +40,10 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <Button variant="ghost" size="sm">
           {getThemeIcon()}
           <span className="ml-2">{getThemeText()}</span>
-        </DropdownMenuItem>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="right">
         <DropdownMenuItem onClick={() => setTheme('light')}>

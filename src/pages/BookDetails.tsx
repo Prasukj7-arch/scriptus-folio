@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { booksAPI, reviewsAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Edit, Trash2, User, Calendar, MessageSquare, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Trash2, User, Calendar, MessageSquare, BarChart3, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -19,26 +19,18 @@ export default function BookDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [book, setBook] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newRating, setNewRating] = useState(0);
   const [newReview, setNewReview] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [editingReview, setEditingReview] = useState<string | null>(null);
-  const [editRating, setEditRating] = useState(0);
-  const [editText, setEditText] = useState('');
-  const [canReview, setCanReview] = useState(false);
-  const [reviewReason, setReviewReason] = useState('');
-  const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('🔍 BookDetails useEffect - id:', id, 'user:', user);
     if (id) {
       fetchBookDetails();
-      if (user) {
-        checkCanReview();
-      }
     }
   }, [id, user]);
 
@@ -51,13 +43,8 @@ export default function BookDetails() {
       if (response.data.success) {
         const bookData = response.data.data;
         setBook(bookData);
-        // Set reviews from the book data if available
-        if (bookData.reviews) {
-          setReviews(bookData.reviews);
-        } else {
-          // If no reviews in book data, fetch them separately
-          fetchReviews();
-        }
+        // Always fetch reviews separately to ensure we get the latest data
+        fetchReviews();
       } else {
         throw new Error(response.data.message || 'Failed to fetch book');
       }
@@ -72,8 +59,12 @@ export default function BookDetails() {
 
   const fetchReviews = async () => {
     try {
+      console.log('🔍 Fetching reviews for book:', id);
       const response = await reviewsAPI.getBookReviews(id!);
+      console.log('📝 Reviews API response:', response.data);
       if (response.data.success) {
+        console.log('✅ Reviews fetched:', response.data.data.length, 'reviews');
+        console.log('📋 Reviews data:', JSON.stringify(response.data.data, null, 2));
         setReviews(response.data.data);
       } else {
         console.error('Failed to fetch reviews:', response.data.message);
@@ -85,31 +76,18 @@ export default function BookDetails() {
     }
   };
 
-  const checkCanReview = async () => {
-    try {
-      console.log('🔍 Checking review eligibility for book:', id, 'user:', user?.id);
-      const response = await reviewsAPI.canReview(id!);
-      console.log('📝 Can review response:', response.data);
-      if (response.data.success) {
-        setCanReview(response.data.data.canReview);
-        setReviewReason(response.data.data.reason || '');
-        setExistingReviewId(response.data.data.existingReviewId || null);
-      }
-    } catch (error: any) {
-      console.error('Error checking review eligibility:', error);
-      setCanReview(false);
-      setReviewReason('Unable to check review eligibility');
-    }
-  };
 
   const handleSubmitReview = async () => {
+    console.log('🔍 Submit review clicked', { user: user?.id, book: book?.addedBy?._id, rating: newRating, review: newReview });
+    
     if (!user) {
       toast.error('Please sign in to add a review');
       return;
     }
 
-    if (!canReview) {
-      toast.error(reviewReason);
+    // Check if user is trying to review their own book
+    if (user.id === book?.addedBy?._id) {
+      toast.error('You cannot review your own book');
       return;
     }
 
@@ -125,55 +103,39 @@ export default function BookDetails() {
 
     setSubmitting(true);
     try {
+      console.log('🔍 Frontend calling createReview with:', { bookId: id!, rating: newRating, reviewText: newReview.trim() });
       const response = await reviewsAPI.createReview({
         bookId: id!,
         rating: newRating,
         reviewText: newReview.trim(),
       });
+      console.log('📝 Frontend received response:', response.data);
+      console.log('📝 Response data details:', {
+        success: response.data.success,
+        message: response.data.message,
+        reviewId: response.data.data?._id,
+        reviewText: response.data.data?.reviewText,
+        rating: response.data.data?.rating
+      });
+      console.log('📝 Full response object:', JSON.stringify(response.data, null, 2));
 
       if (response.data.success) {
         toast.success('Review added successfully!');
         setNewRating(0);
         setNewReview('');
         fetchReviews(); // Refresh reviews
-        checkCanReview(); // Update review eligibility
       } else {
         throw new Error(response.data.message || 'Failed to add review');
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Failed to add review';
-      toast.error(message);
+        toast.error(message);
       console.error(error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleUpdateReview = async (reviewId: string) => {
-    if (editRating === 0 || editText.trim().length < 10) {
-      toast.error('Please provide a valid rating and review (at least 10 characters)');
-      return;
-    }
-
-    try {
-      const response = await reviewsAPI.updateReview(reviewId, {
-        rating: editRating,
-        reviewText: editText.trim(),
-      });
-
-      if (response.data.success) {
-        toast.success('Review updated successfully!');
-        setEditingReview(null);
-        fetchReviews(); // Refresh reviews
-      } else {
-        throw new Error(response.data.message || 'Failed to update review');
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || 'Failed to update review';
-      toast.error(message);
-      console.error(error);
-    }
-  };
 
   const handleDeleteReview = async (reviewId: string) => {
     try {
@@ -182,7 +144,6 @@ export default function BookDetails() {
       if (response.data.success) {
         toast.success('Review deleted successfully!');
         fetchReviews(); // Refresh reviews
-        checkCanReview(); // Update review eligibility
       } else {
         throw new Error(response.data.message || 'Failed to delete review');
       }
@@ -218,19 +179,22 @@ export default function BookDetails() {
 
   // Calculate rating distribution for charts
   const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
-    rating: `${rating} Star${rating > 1 ? 's' : ''}`,
+    rating: `${rating}★`,
     count: reviews.filter(r => r.rating === rating).length,
     percentage: reviews.length > 0 ? Math.round((reviews.filter(r => r.rating === rating).length / reviews.length) * 100) : 0
   }));
 
-  const pieChartData = ratingDistribution.map(item => ({
-    name: item.rating,
-    value: item.count,
-    color: item.rating === '5 Stars' ? '#10b981' : 
-           item.rating === '4 Stars' ? '#34d399' :
-           item.rating === '3 Stars' ? '#fbbf24' :
-           item.rating === '2 Stars' ? '#f59e0b' : '#ef4444'
-  }));
+  const pieChartData = ratingDistribution
+    .filter(item => item.count > 0) // Only show segments with data
+    .map(item => ({
+      name: item.rating,
+      value: item.count,
+      percentage: item.percentage,
+      color: item.rating === '5★' ? '#10b981' : 
+             item.rating === '4★' ? '#34d399' :
+             item.rating === '3★' ? '#fbbf24' :
+             item.rating === '2★' ? '#f59e0b' : '#ef4444'
+    }));
 
   const COLORS = ['#ef4444', '#f59e0b', '#fbbf24', '#34d399', '#10b981'];
 
@@ -268,14 +232,27 @@ export default function BookDetails() {
       <Navbar />
 
       <main className="container mx-auto px-4 py-8 relative z-10">
-        <Button variant="ghost" onClick={() => navigate('/')} className="mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => {
+            const source = searchParams.get('source');
+            if (source === 'my-books') {
+              navigate('/my-books');
+            } else if (source === 'profile') {
+              navigate('/profile');
+            } else {
+              navigate('/all-books');
+            }
+          }} 
+          className="mb-6 bg-card/50 hover:bg-card/70 backdrop-blur-sm rounded-full px-6 py-3 border border-border/50 hover:border-border transition-all duration-200 text-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Books
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-8">
+            <Card className="shadow-card card-modern dark:card-modern-dark border-0">
               <CardHeader className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
@@ -300,10 +277,7 @@ export default function BookDetails() {
                   <StarRating rating={Math.round(averageRating)} readonly size="lg" />
                   <div>
                     <p className="text-2xl font-bold">
-                      {averageRating > 0 ? averageRating.toFixed(1) : 'No ratings'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+                      {averageRating > 0 ? `${averageRating.toFixed(1)} (${reviews.length} ${reviews.length === 1 ? 'review' : 'reviews'})` : 'No ratings'}
                     </p>
                   </div>
                 </div>
@@ -363,17 +337,21 @@ export default function BookDetails() {
                   <BarChart3 className="h-6 w-6" />
                   Rating Distribution
                 </h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <Card className="shadow-card card-modern dark:card-modern-dark border-0">
                     <CardHeader>
                       <CardTitle className="text-lg">Rating Breakdown</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={ratingDistribution}>
+                      <ResponsiveContainer width="100%" height={400}>
+                        <BarChart data={ratingDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="rating" />
-                          <YAxis />
+                          <XAxis 
+                            dataKey="rating" 
+                            tick={{ fontSize: 12 }}
+                            interval={0}
+                          />
+                          <YAxis tick={{ fontSize: 12 }} />
                           <Tooltip />
                           <Bar dataKey="count" fill="#3b82f6" />
                         </BarChart>
@@ -381,20 +359,20 @@ export default function BookDetails() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
+                  <Card className="shadow-card card-modern dark:card-modern-dark border-0">
                     <CardHeader>
                       <CardTitle className="text-lg">Rating Distribution</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
+                      <ResponsiveContainer width="100%" height={400}>
+                        <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                           <Pie
                             data={pieChartData}
                             cx="50%"
                             cy="50%"
                             labelLine={false}
                             label={({ name, percentage }) => `${name}: ${percentage}%`}
-                            outerRadius={80}
+                            outerRadius={100}
                             fill="#8884d8"
                             dataKey="value"
                           >
@@ -402,7 +380,12 @@ export default function BookDetails() {
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip 
+                            formatter={(value, name, props) => [
+                              `${value} ${value === 1 ? 'review' : 'reviews'}`, 
+                              name
+                            ]}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -411,78 +394,77 @@ export default function BookDetails() {
               </div>
             )}
 
-            {/* Reviews Section */}
-            <div>
-              <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
-                <MessageSquare className="h-6 w-6" />
-                Reviews
-              </h2>
+            {/* Write a Review Section */}
+            {(() => {
+              const userId = user?.id;
+              const bookOwnerId = book?.addedBy?._id || book?.addedBy;
+              const shouldShow = user && userId !== bookOwnerId;
+              console.log('🔍 Review section check:', {
+                userId,
+                bookOwnerId,
+                shouldShow,
+                userType: typeof userId,
+                bookOwnerType: typeof bookOwnerId
+              });
+              return shouldShow;
+            })() && (
+              <div>
+                <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+                  <MessageSquare className="h-6 w-6" />
+                  Write a Review
+                </h2>
 
-              {user && (
-                <Card className="mb-6 shadow-card">
-                  <CardHeader>
-                    <h3 className="font-semibold">
-                      {canReview ? 'Write a Review' : 'Review Status'}
-                    </h3>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {canReview ? (
-                      <>
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">Your Rating</label>
-                          <StarRating rating={newRating} onRatingChange={setNewRating} size="lg" />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">Your Review</label>
-                          <Textarea
-                            placeholder="Share your thoughts about this book..."
-                            value={newReview}
-                            onChange={(e) => setNewReview(e.target.value)}
-                            rows={4}
-                            maxLength={500}
-                          />
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {newReview.length}/500 characters
-                          </p>
-                        </div>
-                        <Button
-                          onClick={handleSubmitReview}
-                          disabled={submitting || newRating === 0 || newReview.trim().length < 10}
-                          className="gradient-primary hover:opacity-90"
-                        >
-                          {submitting ? 'Submitting...' : 'Submit Review'}
-                        </Button>
-                      </>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-muted-foreground mb-2">{reviewReason}</p>
-                        {reviewReason.includes('already reviewed') && (
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              const userReview = reviews.find(r => r.userId._id === user.id);
-                              if (userReview) {
-                                setEditingReview(userReview._id);
-                                setEditRating(userReview.rating);
-                                setEditText(userReview.reviewText);
-                              }
-                            }}
-                          >
-                            Edit Your Review
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                <div>
+                <Card className="mb-8 shadow-card card-modern dark:card-modern-dark border-0">
+                  <CardContent className="space-y-4 pt-6">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Your Rating</label>
+                      <StarRating rating={newRating} onRatingChange={setNewRating} size="lg" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Your Review</label>
+                      <Textarea
+                        placeholder="Share your thoughts about this book..."
+                        value={newReview}
+                        onChange={(e) => setNewReview(e.target.value)}
+                        rows={4}
+                        maxLength={500}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {newReview.length}/500 characters
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleSubmitReview}
+                      disabled={submitting || newRating === 0 || newReview.trim().length < 10}
+                      className="gradient-primary hover:opacity-90"
+                    >
+                      {submitting ? 'Submitting...' : 'Submit Review'}
+                    </Button>
                   </CardContent>
                 </Card>
-              )}
+                </div>
+              </div>
+            )}
+
+            {/* All Reviews Section */}
+            <div className="mb-6">
+              <h3 className="text-xl font-bold font-serif mb-4 flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                All Reviews
+              </h3>
 
               <div className="space-y-4">
                 {reviews.length === 0 ? (
-                  <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
+                  <Card className="shadow-card card-modern dark:card-modern-dark border-0">
                     <CardContent className="py-8 text-center text-muted-foreground">
                       <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>No reviews yet. Be the first to review this book!</p>
+                      <p>
+                        {user?.id === book?.addedBy?._id 
+                          ? "No review added" 
+                          : "No reviews yet. Be the first to review this book!"
+                        }
+                      </p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -497,47 +479,10 @@ export default function BookDetails() {
                                 {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
                               </span>
                             </div>
-                            {editingReview === review._id ? (
-                              <StarRating
-                                rating={editRating}
-                                onRatingChange={setEditRating}
-                                size="sm"
-                              />
-                            ) : (
                               <StarRating rating={review.rating} readonly size="sm" />
-                            )}
                           </div>
                           {user?.id === review.userId?._id && (
                             <div className="flex gap-2">
-                              {editingReview === review._id ? (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleUpdateReview(review._id)}
-                                  >
-                                    Save
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => setEditingReview(null)}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </>
-                              ) : (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      setEditingReview(review._id);
-                                      setEditRating(review.rating);
-                                      setEditText(review.reviewText);
-                                    }}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button size="sm" variant="ghost">
@@ -554,32 +499,21 @@ export default function BookDetails() {
                                       <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
-                                          onClick={() => handleDeleteReview(review._id)}
+                                      onClick={() => handleDeleteReview(review._id)}
                                         >
                                           Delete
                                         </AlertDialogAction>
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
                                   </AlertDialog>
-                                </>
-                              )}
                             </div>
                           )}
                         </div>
                       </CardHeader>
                       <CardContent>
-                        {editingReview === review.id ? (
-                          <Textarea
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            rows={4}
-                            maxLength={1000}
-                          />
-                        ) : (
                           <p className="text-muted-foreground leading-relaxed">
                             {review.reviewText}
                           </p>
-                        )}
                       </CardContent>
                     </Card>
                   ))

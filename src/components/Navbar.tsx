@@ -1,7 +1,8 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, Plus, LogIn, LogOut, User, Menu, X, Library, BookMarked } from 'lucide-react';
+import { BookOpen, Plus, LogIn, LogOut, User, Menu, X, Library, BookMarked, Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState } from 'react';
 import {
@@ -14,12 +15,13 @@ import {
 
 export function Navbar() {
   const { user, signOut } = useAuth();
+  const { setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-50 glass dark:glass-dark">
+    <nav className="border-b-2 border-border/60 bg-card/30 backdrop-blur-md sticky top-0 z-50 glass dark:glass-dark shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
@@ -76,7 +78,18 @@ export function Navbar() {
                       Profile
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <ThemeToggle />
+                    <DropdownMenuItem onClick={() => setTheme('light')}>
+                      <Sun className="h-4 w-4 mr-2" />
+                      Light
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('dark')}>
+                      <Moon className="h-4 w-4 mr-2" />
+                      Dark
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setTheme('system')}>
+                      <Monitor className="h-4 w-4 mr-2" />
+                      System
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
                       <LogOut className="h-4 w-4 mr-2" />
@@ -164,7 +177,39 @@ export function Navbar() {
                     <User className="h-4 w-4 mr-2" />
                     Profile
                   </Button>
-                  <ThemeToggle />
+                  <Button
+                    onClick={() => {
+                      setTheme('light');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <Sun className="h-4 w-4 mr-2" />
+                    Light
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setTheme('dark');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <Moon className="h-4 w-4 mr-2" />
+                    Dark
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setTheme('system');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <Monitor className="h-4 w-4 mr-2" />
+                    System
+                  </Button>
                   <Button
                     onClick={() => {
                       signOut();
