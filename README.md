@@ -270,5 +270,3 @@ This project is created for educational purposes and is open source.
 ---
 
 **Happy Reading! 📖✨**
-
-*Built with ❤️ using React, Node.js, and MongoDB*
