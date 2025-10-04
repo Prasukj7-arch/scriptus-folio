@@ -7,9 +7,116 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 
 // @route   GET /api/books
-// @desc    Get user's books with pagination and filtering
+// @desc    Get all books with pagination and filtering (accessible to all users)
 // @access  Private
 router.get('/', protect, [
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
+  query('search').optional().isString().withMessage('Search must be a string'),
+  query('genre').optional().isString().withMessage('Genre must be a string')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const search = req.query.search || '';
+    const genre = req.query.genre || '';
+
+    const skip = (page - 1) * limit;
+
+    // Build query - show all books to all users
+    let query = {};
+    
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    if (genre) {
+      query.genre = genre;
+    }
+
+    // Get books with pagination
+    const books = await Book.find(query)
+      .populate('addedBy', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Get total count for pagination
+    const totalBooks = await Book.countDocuments(query);
+    const totalPages = Math.ceil(totalBooks / limit);
+
+    // Get average ratings and review counts for each book
+    const booksWithRatings = await Promise.all(
+      books.map(async (book) => {
+        const reviews = await Review.find({ bookId: book._id });
+        const ratings = reviews.map(review => review.rating);
+        const averageRating = ratings.length > 0
+          ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+          : 0;
+
+        return {
+          ...book.toObject(),
+          averageRating: Math.round(averageRating * 10) / 10,
+          reviewCount: ratings.length
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: booksWithRatings,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalBooks,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    });
+  } catch (error) {
+    console.error('Get books error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching books'
+    });
+  }
+});
+
+// @route   GET /api/books/genres
+// @desc    Get unique genres from all books
+// @access  Private
+router.get('/genres', protect, async (req, res) => {
+  try {
+    const genres = await Book.distinct('genre');
+    res.json({
+      success: true,
+      data: genres.sort()
+    });
+  } catch (error) {
+    console.error('Get genres error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching genres'
+    });
+  }
+});
+
+// @route   GET /api/books/my-books
+// @desc    Get books created by current user
+// @access  Private
+router.get('/my-books', protect, [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
   query('search').optional().isString().withMessage('Search must be a string'),
@@ -88,42 +195,20 @@ router.get('/', protect, [
       }
     });
   } catch (error) {
-    console.error('Get books error:', error);
+    console.error('Get my books error:', error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching books'
-    });
-  }
-});
-
-// @route   GET /api/books/genres
-// @desc    Get unique genres from user's books
-// @access  Private
-router.get('/genres', protect, async (req, res) => {
-  try {
-    const genres = await Book.distinct('genre', { addedBy: req.user.id });
-    res.json({
-      success: true,
-      data: genres.sort()
-    });
-  } catch (error) {
-    console.error('Get genres error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching genres'
+      message: 'Server error while fetching my books'
     });
   }
 });
 
 // @route   GET /api/books/:id
-// @desc    Get single book by ID (user's own books only)
+// @desc    Get single book by ID (accessible to all users)
 // @access  Private
 router.get('/:id', protect, async (req, res) => {
   try {
-    const book = await Book.findOne({ 
-      _id: req.params.id, 
-      addedBy: req.user.id 
-    }).populate('addedBy', 'name email');
+    const book = await Book.findById(req.params.id).populate('addedBy', 'name email');
     
     if (!book) {
       return res.status(404).json({

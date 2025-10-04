@@ -64,6 +64,17 @@ export const booksAPI = {
     return api.get('/books', { params });
   },
   
+  getMyBooks: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    genre?: string;
+  }) => {
+    console.log('🔧 booksAPI.getMyBooks called with params:', params);
+    console.log('🔧 Making request to:', `${API_URL}/books/my-books`);
+    return api.get('/books/my-books', { params });
+  },
+  
   getBook: (id: string) => api.get(`/books/${id}`),
   
   createBook: (bookData: {
@@ -102,7 +113,11 @@ export const reviewsAPI = {
   
   deleteReview: (id: string) => api.delete(`/reviews/${id}`),
   
+  getBookReviews: (bookId: string) => api.get(`/reviews/book/${bookId}`),
+  
   getUserReviews: (userId: string) => api.get(`/reviews/user/${userId}`),
+  
+  canReview: (bookId: string) => api.get(`/reviews/can-review/${bookId}`),
 };
 
 export default api;

@@ -4,13 +4,14 @@ import { BookCard } from '@/components/BookCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
-import { Search, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus, BookOpen, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 5; // Changed to 5 as per requirements
 
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
@@ -21,6 +22,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [genreFilter, setGenreFilter] = useState<string>('all');
   const [genres, setGenres] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
 
   useEffect(() => {
     if (user) {
@@ -32,7 +34,7 @@ export default function Home() {
     if (user) {
       fetchBooks();
     }
-  }, [user, currentPage, searchQuery, genreFilter]);
+  }, [user, currentPage, searchQuery, genreFilter, activeTab]);
 
   const fetchGenres = async () => {
     try {
@@ -62,7 +64,9 @@ export default function Home() {
       }
 
       console.log('🔍 Fetching books with params:', params);
-      const response = await booksAPI.getBooks(params);
+      const response = activeTab === 'all' 
+        ? await booksAPI.getBooks(params)
+        : await booksAPI.getMyBooks(params);
       console.log('📚 Books API response:', response.data);
       
       if (response.data.success) {
@@ -138,10 +142,10 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-12 text-center">
           <h1 className="text-5xl font-bold font-serif mb-4 gradient-primary bg-clip-text text-transparent">
-            Your Personal Book Library
+            Book Review Platform
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Manage your personal collection of books and reviews
+            Discover books, add your own, and share reviews with the community
           </p>
           <Link to="/books/new">
             <Button size="lg" className="text-lg px-8 py-3">
@@ -151,102 +155,221 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="mb-8 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by title or author..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-10"
-            />
-          </div>
-          <Select
-            value={genreFilter}
-            onValueChange={(value) => {
-              setGenreFilter(value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Filter by genre" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Genres</SelectItem>
-              {genres.map((genre) => (
-                <SelectItem key={genre} value={genre}>
-                  {genre}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs value={activeTab} onValueChange={(value) => {
+          setActiveTab(value as 'all' | 'my');
+          setCurrentPage(1);
+        }} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              All Books
+            </TabsTrigger>
+            <TabsTrigger value="my" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              My Books
+            </TabsTrigger>
+          </TabsList>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        ) : books.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-xl text-muted-foreground mb-4">Your library is empty</p>
-            <p className="text-muted-foreground mb-6">Start building your personal book collection by adding your first book!</p>
-            <Link to="/books/new">
-              <Button size="lg">
-                <Plus className="mr-2 h-5 w-5" />
-                Add Your First Book
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {books.map((book) => (
-                <BookCard
-                  key={book._id || book.id}
-                  id={book._id || book.id}
-                  title={book.title}
-                  author={book.author}
-                  genre={book.genre}
-                  publishedYear={book.publishedYear}
-                  description={book.description}
-                  averageRating={book.averageRating}
-                  reviewCount={book.reviewCount}
-                  onEdit={handleEditBook}
-                  onDelete={handleDeleteBook}
+          <TabsContent value="all" className="space-y-6">
+            <div className="mb-8 flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by title or author..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-10"
                 />
-              ))}
+              </div>
+              <Select
+                value={genreFilter}
+                onValueChange={(value) => {
+                  setGenreFilter(value);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by genre" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Genres</SelectItem>
+                  {genres.map((genre) => (
+                    <SelectItem key={genre} value={genre}>
+                      {genre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
+                ))}
               </div>
+            ) : books.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-xl text-muted-foreground mb-4">No books found</p>
+                <p className="text-muted-foreground mb-6">Be the first to add a book to the platform!</p>
+                <Link to="/books/new">
+                  <Button size="lg">
+                    <Plus className="mr-2 h-5 w-5" />
+                    Add First Book
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {books.map((book) => (
+                    <BookCard
+                      key={book._id || book.id}
+                      id={book._id || book.id}
+                      title={book.title}
+                      author={book.author}
+                      genre={book.genre}
+                      publishedYear={book.publishedYear}
+                      description={book.description}
+                      averageRating={book.averageRating}
+                      reviewCount={book.reviewCount}
+                      addedBy={book.addedBy}
+                      currentUserId={user?.id}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
+          </TabsContent>
+
+          <TabsContent value="my" className="space-y-6">
+            <div className="mb-8 flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search your books..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-10"
+                />
+              </div>
+              <Select
+                value={genreFilter}
+                onValueChange={(value) => {
+                  setGenreFilter(value);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by genre" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Genres</SelectItem>
+                  {genres.map((genre) => (
+                    <SelectItem key={genre} value={genre}>
+                      {genre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-64 bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            ) : books.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-xl text-muted-foreground mb-4">Your library is empty</p>
+                <p className="text-muted-foreground mb-6">Start building your personal book collection by adding your first book!</p>
+                <Link to="/books/new">
+                  <Button size="lg">
+                    <Plus className="mr-2 h-5 w-5" />
+                    Add Your First Book
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {books.map((book) => (
+                    <BookCard
+                      key={book._id || book.id}
+                      id={book._id || book.id}
+                      title={book.title}
+                      author={book.author}
+                      genre={book.genre}
+                      publishedYear={book.publishedYear}
+                      description={book.description}
+                      averageRating={book.averageRating}
+                      reviewCount={book.reviewCount}
+                      addedBy={book.addedBy}
+                      currentUserId={user?.id}
+                      onEdit={handleEditBook}
+                      onDelete={handleDeleteBook}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

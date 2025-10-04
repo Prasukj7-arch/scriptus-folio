@@ -1,5 +1,6 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { generateToken } from '../middleware/auth.js';
 
@@ -134,7 +135,6 @@ router.get('/me', async (req, res) => {
       });
     }
 
-    const jwt = await import('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
 

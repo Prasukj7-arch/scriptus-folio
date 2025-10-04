@@ -27,13 +27,19 @@ export default function BookDetails() {
   const [editingReview, setEditingReview] = useState<string | null>(null);
   const [editRating, setEditRating] = useState(0);
   const [editText, setEditText] = useState('');
+  const [canReview, setCanReview] = useState(false);
+  const [reviewReason, setReviewReason] = useState('');
+  const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
       fetchBookDetails();
       fetchReviews();
+      if (user) {
+        checkCanReview();
+      }
     }
-  }, [id]);
+  }, [id, user]);
 
   const fetchBookDetails = async () => {
     try {
@@ -54,13 +60,39 @@ export default function BookDetails() {
   };
 
   const fetchReviews = async () => {
-    // Reviews are now included in the book details response
-    // This function is kept for consistency but not used
+    try {
+      const response = await reviewsAPI.getBookReviews(id!);
+      if (response.data.success) {
+        setReviews(response.data.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
+
+  const checkCanReview = async () => {
+    try {
+      const response = await reviewsAPI.canReview(id!);
+      if (response.data.success) {
+        setCanReview(response.data.canReview);
+        setReviewReason(response.data.reason || '');
+        setExistingReviewId(response.data.existingReview || null);
+      }
+    } catch (error: any) {
+      console.error('Error checking review eligibility:', error);
+      setCanReview(false);
+      setReviewReason('Unable to check review eligibility');
+    }
   };
 
   const handleSubmitReview = async () => {
     if (!user) {
       toast.error('Please sign in to add a review');
+      return;
+    }
+
+    if (!canReview) {
+      toast.error(reviewReason);
       return;
     }
 
@@ -86,17 +118,14 @@ export default function BookDetails() {
         toast.success('Review added successfully!');
         setNewRating(0);
         setNewReview('');
-        fetchBookDetails(); // Refresh book details to get updated reviews
+        fetchReviews(); // Refresh reviews
+        checkCanReview(); // Update review eligibility
       } else {
         throw new Error(response.data.message || 'Failed to add review');
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || 'Failed to add review';
-      if (message.includes('duplicate') || message.includes('already reviewed')) {
-        toast.error('You have already reviewed this book');
-      } else {
-        toast.error(message);
-      }
+      toast.error(message);
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -118,7 +147,7 @@ export default function BookDetails() {
       if (response.data.success) {
         toast.success('Review updated successfully!');
         setEditingReview(null);
-        fetchBookDetails(); // Refresh book details to get updated reviews
+        fetchReviews(); // Refresh reviews
       } else {
         throw new Error(response.data.message || 'Failed to update review');
       }
@@ -135,7 +164,8 @@ export default function BookDetails() {
 
       if (response.data.success) {
         toast.success('Review deleted successfully!');
-        fetchBookDetails(); // Refresh book details to get updated reviews
+        fetchReviews(); // Refresh reviews
+        checkCanReview(); // Update review eligibility
       } else {
         throw new Error(response.data.message || 'Failed to delete review');
       }
@@ -298,36 +328,61 @@ export default function BookDetails() {
                 Reviews
               </h2>
 
-              {user && !userReview && (
+              {user && (
                 <Card className="mb-6 shadow-card">
                   <CardHeader>
-                    <h3 className="font-semibold">Write a Review</h3>
+                    <h3 className="font-semibold">
+                      {canReview ? 'Write a Review' : 'Review Status'}
+                    </h3>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Your Rating</label>
-                      <StarRating rating={newRating} onRatingChange={setNewRating} size="lg" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Your Review</label>
-                      <Textarea
-                        placeholder="Share your thoughts about this book..."
-                        value={newReview}
-                        onChange={(e) => setNewReview(e.target.value)}
-                        rows={4}
-                        maxLength={1000}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {newReview.length}/1000 characters
-                      </p>
-                    </div>
-                    <Button
-                      onClick={handleSubmitReview}
-                      disabled={submitting || newRating === 0 || newReview.trim().length < 10}
-                      className="gradient-primary hover:opacity-90"
-                    >
-                      {submitting ? 'Submitting...' : 'Submit Review'}
-                    </Button>
+                    {canReview ? (
+                      <>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Your Rating</label>
+                          <StarRating rating={newRating} onRatingChange={setNewRating} size="lg" />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Your Review</label>
+                          <Textarea
+                            placeholder="Share your thoughts about this book..."
+                            value={newReview}
+                            onChange={(e) => setNewReview(e.target.value)}
+                            rows={4}
+                            maxLength={500}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {newReview.length}/500 characters
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleSubmitReview}
+                          disabled={submitting || newRating === 0 || newReview.trim().length < 10}
+                          className="gradient-primary hover:opacity-90"
+                        >
+                          {submitting ? 'Submitting...' : 'Submit Review'}
+                        </Button>
+                      </>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-muted-foreground mb-2">{reviewReason}</p>
+                        {reviewReason.includes('already reviewed') && (
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              const userReview = reviews.find(r => r.userId._id === user.id);
+                              if (userReview) {
+                                setEditingReview(userReview._id);
+                                setEditRating(userReview.rating);
+                                setEditText(userReview.reviewText);
+                              }
+                            }}
+                          >
+                            Edit Your Review
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
@@ -342,7 +397,7 @@ export default function BookDetails() {
                   </Card>
                 ) : (
                   reviews.map((review) => (
-                    <Card key={review.id} className="shadow-card">
+                    <Card key={review._id} className="shadow-card">
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="space-y-2">
@@ -352,7 +407,7 @@ export default function BookDetails() {
                                 {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
                               </span>
                             </div>
-                            {editingReview === review.id ? (
+                            {editingReview === review._id ? (
                               <StarRating
                                 rating={editRating}
                                 onRatingChange={setEditRating}
@@ -364,11 +419,11 @@ export default function BookDetails() {
                           </div>
                           {user?.id === review.userId?._id && (
                             <div className="flex gap-2">
-                              {editingReview === review.id ? (
+                              {editingReview === review._id ? (
                                 <>
                                   <Button
                                     size="sm"
-                                    onClick={() => handleUpdateReview(review.id)}
+                                    onClick={() => handleUpdateReview(review._id)}
                                   >
                                     Save
                                   </Button>
@@ -386,7 +441,7 @@ export default function BookDetails() {
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => {
-                                      setEditingReview(review.id);
+                                      setEditingReview(review._id);
                                       setEditRating(review.rating);
                                       setEditText(review.reviewText);
                                     }}
@@ -409,7 +464,7 @@ export default function BookDetails() {
                                       <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
-                                          onClick={() => handleDeleteReview(review.id)}
+                                          onClick={() => handleDeleteReview(review._id)}
                                         >
                                           Delete
                                         </AlertDialogAction>

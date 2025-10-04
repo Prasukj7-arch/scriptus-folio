@@ -35,6 +35,14 @@ router.post('/', protect, [
       });
     }
 
+    // Check if user is trying to review their own book
+    if (book.addedBy.toString() === req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot review your own book'
+      });
+    }
+
     // Check if user already reviewed this book
     const existingReview = await Review.findOne({
       bookId,
@@ -171,6 +179,28 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
+// @route   GET /api/reviews/book/:bookId
+// @desc    Get all reviews for a specific book
+// @access  Public
+router.get('/book/:bookId', async (req, res) => {
+  try {
+    const reviews = await Review.find({ bookId: req.params.bookId })
+      .populate('userId', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: reviews
+    });
+  } catch (error) {
+    console.error('Get book reviews error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching book reviews'
+    });
+  }
+});
+
 // @route   GET /api/reviews/user/:userId
 // @desc    Get all reviews by a specific user
 // @access  Public
@@ -190,6 +220,59 @@ router.get('/user/:userId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while fetching user reviews'
+    });
+  }
+});
+
+// @route   GET /api/reviews/can-review/:bookId
+// @desc    Check if current user can review a specific book
+// @access  Private
+router.get('/can-review/:bookId', protect, async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.bookId);
+    
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: 'Book not found'
+      });
+    }
+
+    // Check if user is the book owner
+    const isOwner = book.addedBy.toString() === req.user._id.toString();
+    
+    if (isOwner) {
+      return res.json({
+        success: true,
+        canReview: false,
+        reason: 'You cannot review your own book'
+      });
+    }
+
+    // Check if user already reviewed this book
+    const existingReview = await Review.findOne({
+      bookId: req.params.bookId,
+      userId: req.user._id
+    });
+
+    if (existingReview) {
+      return res.json({
+        success: true,
+        canReview: false,
+        reason: 'You have already reviewed this book',
+        existingReview: existingReview._id
+      });
+    }
+
+    res.json({
+      success: true,
+      canReview: true
+    });
+  } catch (error) {
+    console.error('Check can review error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while checking review eligibility'
     });
   }
 });

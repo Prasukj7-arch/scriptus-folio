@@ -14,6 +14,12 @@ interface BookCardProps {
   description: string;
   averageRating?: number;
   reviewCount?: number;
+  addedBy?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  currentUserId?: string;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
@@ -27,9 +33,12 @@ export function BookCard({
   description,
   averageRating = 0,
   reviewCount = 0,
+  addedBy,
+  currentUserId,
   onEdit,
   onDelete,
 }: BookCardProps) {
+  const isOwner = addedBy && currentUserId && addedBy._id === currentUserId;
   return (
     <Link to={`/books/${id}`}>
       <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group relative">
@@ -54,6 +63,11 @@ export function BookCard({
               <span>{publishedYear}</span>
             </div>
           </div>
+          {addedBy && (
+            <div className="text-xs text-muted-foreground">
+              Added by {addedBy.name}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
@@ -71,7 +85,7 @@ export function BookCard({
           </div>
         </CardFooter>
         
-        {(onEdit || onDelete) && (
+        {isOwner && (onEdit || onDelete) && (
           <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {onEdit && (
               <Button
