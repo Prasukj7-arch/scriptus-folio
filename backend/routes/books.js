@@ -8,8 +8,8 @@ const router = express.Router();
 
 // @route   GET /api/books
 // @desc    Get all books with pagination and filtering (accessible to all users)
-// @access  Private
-router.get('/', protect, [
+// @access  Public
+router.get('/', [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
   query('search').optional().isString().withMessage('Search must be a string'),
@@ -134,7 +134,7 @@ router.get('/', protect, [
 // @route   GET /api/books/genres
 // @desc    Get unique genres from all books
 // @access  Private
-router.get('/genres', protect, async (req, res) => {
+router.get('/genres', async (req, res) => {
   try {
     const genres = await Book.distinct('genre');
     res.json({
