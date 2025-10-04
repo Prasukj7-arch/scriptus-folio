@@ -80,19 +80,19 @@ export default function Home() {
           {/* Quick Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <Link to="/all-books">
-              <Button size="lg" className="text-xl px-16 py-8 hover-lift gradient-primary shadow-2xl font-semibold">
+              <Button size="lg" className="text-xl px-16 py-8 gradient-primary shadow-2xl font-semibold">
                 <BookOpen className="mr-4 h-6 w-6" />
                 Browse All Books
               </Button>
             </Link>
             <Link to="/my-books">
-              <Button size="lg" variant="outline" className="text-xl px-16 py-8 hover-lift glass font-semibold">
+              <Button size="lg" variant="outline" className="text-xl px-16 py-8 border-primary/30 hover:border-primary/50 hover:bg-primary/5 font-semibold text-foreground hover:text-foreground dark:text-foreground dark:hover:text-foreground">
                 <User className="mr-4 h-6 w-6" />
                 My Books
               </Button>
             </Link>
             <Link to="/books/new">
-              <Button size="lg" className="text-xl px-16 py-8 hover-lift gradient-primary shadow-2xl font-semibold">
+              <Button size="lg" className="text-xl px-16 py-8 gradient-primary shadow-2xl font-semibold">
                 <Plus className="mr-4 h-6 w-6" />
                 Add New Book
               </Button>

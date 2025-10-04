@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/StarRating';
-import { User, BookOpen, Star, MessageSquare, Calendar, Plus } from 'lucide-react';
+import { User, BookOpen, Star, MessageSquare, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -160,30 +160,16 @@ export default function Profile() {
           </TabsList>
 
           <TabsContent value="books" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold font-serif">My Books</h2>
-              <Link to="/books/new">
-                <Button className="gradient-primary hover:opacity-90">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Book
-                </Button>
-              </Link>
-            </div>
+            <h2 className="text-2xl font-bold font-serif">My Books</h2>
 
             {myBooks.length === 0 ? (
               <Card className="shadow-card">
                 <CardContent className="py-12 text-center">
                   <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
                   <h3 className="text-xl font-semibold mb-2">No books added yet</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Share your favorite books with the community by adding your first book!
+                  <p className="text-muted-foreground">
+                    You haven't added any books to your collection yet.
                   </p>
-                  <Link to="/books/new">
-                    <Button size="lg">
-                      <Plus className="h-5 w-5 mr-2" />
-                      Add Your First Book
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
             ) : (

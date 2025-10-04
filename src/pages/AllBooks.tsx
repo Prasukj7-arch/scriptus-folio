@@ -103,26 +103,9 @@ export default function AllBooks() {
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="gradient-primary p-3 rounded-xl">
-              <BookOpen className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold font-serif" style={{
-                background: 'linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>All Books</h1>
-              <p className="text-muted-foreground mt-2">Discover and explore books from our community</p>
-            </div>
-          </div>
-        </div>
 
         {/* Search and Filter Section */}
-        <div className="bg-card/30 backdrop-blur-sm rounded-xl p-6 border border-border/50 mb-8">
+        <div className="bg-card/30 backdrop-blur-sm rounded-xl p-6 border-2 border-border/60 mb-8">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -133,7 +116,7 @@ export default function AllBooks() {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-12 h-12 text-base bg-background/50 border-border/50 focus:border-primary/50"
+                className="pl-12 h-12 text-base bg-background/50 border-border focus:border-primary"
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-4 lg:w-96">
@@ -144,7 +127,7 @@ export default function AllBooks() {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="h-12 bg-background/50 border-border/50 focus:border-primary/50">
+                <SelectTrigger className="h-12 bg-background/50 border-border focus:border-primary">
                   <SelectValue placeholder="All Genres" />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,7 +146,7 @@ export default function AllBooks() {
                   setCurrentPage(1);
                 }}
               >
-                <SelectTrigger className="h-12 bg-background/50 border-border/50 focus:border-primary/50">
+                <SelectTrigger className="h-12 bg-background/50 border-border focus:border-primary">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>

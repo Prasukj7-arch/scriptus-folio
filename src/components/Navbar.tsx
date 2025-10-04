@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BookOpen, Plus, LogIn, LogOut, User, Menu, X, Library, BookMarked } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,7 @@ import {
 export function Navbar() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -25,37 +26,40 @@ export function Navbar() {
             <div className="gradient-primary p-2 rounded-lg transition-smooth group-hover:scale-105">
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl sm:text-2xl font-bold font-serif" style={{
-              background: 'linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              <span className="hidden sm:inline">BookReview Platform</span>
-              <span className="sm:hidden">BRP</span>
+            <span className="text-xl sm:text-2xl font-bold font-serif text-primary">
+              BRP
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
-            <ThemeToggle />
             {user ? (
               <>
                 <Link to="/all-books">
-                  <Button variant="ghost" className="hover-lift">
+                  <Button 
+                    variant="outline" 
+                    className={`hover-lift border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground hover:text-foreground dark:text-foreground dark:hover:text-foreground ${
+                      location.pathname === '/all-books' ? 'bg-primary/10 border-primary/40 text-primary' : ''
+                    }`}
+                  >
                     <Library className="h-4 w-4 mr-2" />
                     All Books
                   </Button>
                 </Link>
                 <Link to="/my-books">
-                  <Button variant="ghost" className="hover-lift">
+                  <Button 
+                    variant="outline" 
+                    className={`hover-lift border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground hover:text-foreground dark:text-foreground dark:hover:text-foreground ${
+                      location.pathname === '/my-books' ? 'bg-primary/10 border-primary/40 text-primary' : ''
+                    }`}
+                  >
                     <BookMarked className="h-4 w-4 mr-2" />
                     My Books
                   </Button>
                 </Link>
                 <Button
                   onClick={() => navigate('/books/new')}
-                  className="gradient-primary hover:opacity-90 transition-smooth"
+                  className="gradient-primary hover:opacity-90 transition-smooth hover-lift"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Book
@@ -72,6 +76,8 @@ export function Navbar() {
                       Profile
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <ThemeToggle />
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
@@ -80,19 +86,21 @@ export function Navbar() {
                 </DropdownMenu>
               </>
             ) : (
-              <Button
-                onClick={() => navigate('/auth')}
-                className="gradient-primary hover:opacity-90 transition-smooth"
-              >
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </Button>
+              <>
+                <ThemeToggle />
+                <Button
+                  onClick={() => navigate('/auth')}
+                  className="gradient-primary hover:opacity-90 transition-smooth"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </>
             )}
           </div>
 
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
@@ -114,8 +122,10 @@ export function Navbar() {
                       navigate('/all-books');
                       setIsMobileMenuOpen(false);
                     }}
-                    variant="ghost"
-                    className="w-full justify-start"
+                    variant="outline"
+                    className={`w-full justify-start border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground hover:text-foreground dark:text-foreground dark:hover:text-foreground ${
+                      location.pathname === '/all-books' ? 'bg-primary/10 border-primary/40 text-primary' : ''
+                    }`}
                   >
                     <Library className="h-4 w-4 mr-2" />
                     All Books
@@ -125,8 +135,10 @@ export function Navbar() {
                       navigate('/my-books');
                       setIsMobileMenuOpen(false);
                     }}
-                    variant="ghost"
-                    className="w-full justify-start"
+                    variant="outline"
+                    className={`w-full justify-start border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-foreground hover:text-foreground dark:text-foreground dark:hover:text-foreground ${
+                      location.pathname === '/my-books' ? 'bg-primary/10 border-primary/40 text-primary' : ''
+                    }`}
                   >
                     <BookMarked className="h-4 w-4 mr-2" />
                     My Books
@@ -152,6 +164,7 @@ export function Navbar() {
                     <User className="h-4 w-4 mr-2" />
                     Profile
                   </Button>
+                  <ThemeToggle />
                   <Button
                     onClick={() => {
                       signOut();
@@ -165,16 +178,19 @@ export function Navbar() {
                   </Button>
                 </>
               ) : (
-                <Button
-                  onClick={() => {
-                    navigate('/auth');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="gradient-primary hover:opacity-90 transition-smooth w-full justify-start"
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
+                <>
+                  <ThemeToggle />
+                  <Button
+                    onClick={() => {
+                      navigate('/auth');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="gradient-primary hover:opacity-90 transition-smooth w-full justify-start"
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </>
               )}
             </div>
           </div>
