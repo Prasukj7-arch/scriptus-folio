@@ -33,6 +33,7 @@ export default function BookDetails() {
   const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('🔍 BookDetails useEffect - id:', id, 'user:', user);
     if (id) {
       fetchBookDetails();
       if (user) {
@@ -86,11 +87,13 @@ export default function BookDetails() {
 
   const checkCanReview = async () => {
     try {
+      console.log('🔍 Checking review eligibility for book:', id, 'user:', user?.id);
       const response = await reviewsAPI.canReview(id!);
+      console.log('📝 Can review response:', response.data);
       if (response.data.success) {
-        setCanReview(response.data.canReview);
-        setReviewReason(response.data.reason || '');
-        setExistingReviewId(response.data.existingReview || null);
+        setCanReview(response.data.data.canReview);
+        setReviewReason(response.data.data.reason || '');
+        setExistingReviewId(response.data.data.existingReviewId || null);
       }
     } catch (error: any) {
       console.error('Error checking review eligibility:', error);
