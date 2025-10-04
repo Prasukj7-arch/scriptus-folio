@@ -109,7 +109,12 @@ export default function MyBooks() {
               <User className="h-8 w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold font-serif gradient-text-animated">My Books</h1>
+              <h1 className="text-4xl font-bold font-serif" style={{
+                background: 'linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>My Books</h1>
               <p className="text-muted-foreground mt-2">Manage and organize your book collection</p>
             </div>
           </div>

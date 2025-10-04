@@ -110,7 +110,12 @@ export default function AllBooks() {
               <BookOpen className="h-8 w-8 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold font-serif gradient-text-animated">All Books</h1>
+              <h1 className="text-4xl font-bold font-serif" style={{
+                background: 'linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>All Books</h1>
               <p className="text-muted-foreground mt-2">Discover and explore books from our community</p>
             </div>
           </div>

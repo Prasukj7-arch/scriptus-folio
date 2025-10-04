@@ -25,7 +25,12 @@ export function Navbar() {
             <div className="gradient-primary p-2 rounded-lg transition-smooth group-hover:scale-105">
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl sm:text-2xl font-bold font-serif gradient-text-animated">
+            <span className="text-xl sm:text-2xl font-bold font-serif" style={{
+              background: 'linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
               <span className="hidden sm:inline">BookReview Platform</span>
               <span className="sm:hidden">BRP</span>
             </span>

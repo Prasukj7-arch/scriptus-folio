@@ -73,7 +73,12 @@ export default function Auth() {
               <BookOpen className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-serif gradient-text-animated">Welcome to BookReview Platform</CardTitle>
+          <CardTitle className="text-3xl font-serif" style={{
+            background: 'linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>Welcome to BookReview Platform</CardTitle>
           <CardDescription>
             Join our community of book lovers to share and discover great reads
           </CardDescription>
