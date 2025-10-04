@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Plus, LogIn, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,11 +24,12 @@ export function Navbar() {
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold font-serif gradient-primary bg-clip-text text-transparent">
-              BookReview
+              BookReview Platform
             </span>
           </Link>
 
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {user ? (
               <>
                 <Button

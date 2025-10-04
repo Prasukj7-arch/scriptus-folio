@@ -10,9 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Edit, Trash2, User, Calendar, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, User, Calendar, MessageSquare, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -34,7 +35,6 @@ export default function BookDetails() {
   useEffect(() => {
     if (id) {
       fetchBookDetails();
-      fetchReviews();
       if (user) {
         checkCanReview();
       }
@@ -43,17 +43,27 @@ export default function BookDetails() {
 
   const fetchBookDetails = async () => {
     try {
+      console.log('🔍 Fetching book details for ID:', id);
       const response = await booksAPI.getBook(id!);
+      console.log('📚 Book API response:', response.data);
       
       if (response.data.success) {
-        setBook(response.data.data);
-        setReviews(response.data.data.reviews || []);
+        const bookData = response.data.data;
+        setBook(bookData);
+        // Set reviews from the book data if available
+        if (bookData.reviews) {
+          setReviews(bookData.reviews);
+        } else {
+          // If no reviews in book data, fetch them separately
+          fetchReviews();
+        }
       } else {
         throw new Error(response.data.message || 'Failed to fetch book');
       }
     } catch (error: any) {
+      console.error('Error fetching book details:', error);
       toast.error('Failed to load book details');
-      console.error(error);
+      setBook(null); // Explicitly set book to null on error
     } finally {
       setLoading(false);
     }
@@ -64,9 +74,13 @@ export default function BookDetails() {
       const response = await reviewsAPI.getBookReviews(id!);
       if (response.data.success) {
         setReviews(response.data.data);
+      } else {
+        console.error('Failed to fetch reviews:', response.data.message);
+        setReviews([]); // Set empty array on failure
       }
     } catch (error: any) {
       console.error('Error fetching reviews:', error);
+      setReviews([]); // Set empty array on error
     }
   };
 
@@ -199,6 +213,24 @@ export default function BookDetails() {
 
   const userReview = reviews.find(r => r.userId === user?.id);
 
+  // Calculate rating distribution for charts
+  const ratingDistribution = [1, 2, 3, 4, 5].map(rating => ({
+    rating: `${rating} Star${rating > 1 ? 's' : ''}`,
+    count: reviews.filter(r => r.rating === rating).length,
+    percentage: reviews.length > 0 ? Math.round((reviews.filter(r => r.rating === rating).length / reviews.length) * 100) : 0
+  }));
+
+  const pieChartData = ratingDistribution.map(item => ({
+    name: item.rating,
+    value: item.count,
+    color: item.rating === '5 Stars' ? '#10b981' : 
+           item.rating === '4 Stars' ? '#34d399' :
+           item.rating === '3 Stars' ? '#fbbf24' :
+           item.rating === '2 Stars' ? '#f59e0b' : '#ef4444'
+  }));
+
+  const COLORS = ['#ef4444', '#f59e0b', '#fbbf24', '#34d399', '#10b981'];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -320,6 +352,61 @@ export default function BookDetails() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Rating Charts Section */}
+            {reviews.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+                  <BarChart3 className="h-6 w-6" />
+                  Rating Distribution
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="shadow-card">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Rating Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={ratingDistribution}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="rating" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#3b82f6" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-card">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Rating Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={pieChartData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percentage }) => `${name}: ${percentage}%`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {pieChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
 
             {/* Reviews Section */}
             <div>

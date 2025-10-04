@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Navbar } from '@/components/Navbar';
-import { Search, ChevronLeft, ChevronRight, Plus, BookOpen, User } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Plus, BookOpen, User, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -23,6 +23,7 @@ export default function Home() {
   const [genreFilter, setGenreFilter] = useState<string>('all');
   const [genres, setGenres] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
 
   useEffect(() => {
     if (user) {
@@ -34,7 +35,7 @@ export default function Home() {
     if (user) {
       fetchBooks();
     }
-  }, [user, currentPage, searchQuery, genreFilter, activeTab]);
+  }, [user, currentPage, searchQuery, genreFilter, activeTab, sortBy]);
 
   const fetchGenres = async () => {
     try {
@@ -61,6 +62,10 @@ export default function Home() {
 
       if (genreFilter !== 'all') {
         params.genre = genreFilter;
+      }
+
+      if (sortBy !== 'newest') {
+        params.sortBy = sortBy;
       }
 
       console.log('🔍 Fetching books with params:', params);
@@ -120,9 +125,9 @@ export default function Home() {
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <h1 className="text-4xl font-bold font-serif mb-4">Welcome to Your Personal Book Library</h1>
+            <h1 className="text-4xl font-bold font-serif mb-4">Welcome to BookReview Platform</h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Sign in to manage your personal collection of books and reviews
+              Sign in to discover, review, and share your favorite books with the community
             </p>
             <Link to="/auth">
               <Button size="lg" className="text-lg px-8 py-3">
@@ -145,7 +150,7 @@ export default function Home() {
             Book Review Platform
           </h1>
           <p className="text-xl text-muted-foreground mb-6">
-            Discover books, add your own, and share reviews with the community
+            Discover amazing books, share your reviews, and connect with fellow book lovers
           </p>
           <Link to="/books/new">
             <Button size="lg" className="text-lg px-8 py-3">
@@ -201,6 +206,27 @@ export default function Home() {
                       {genre}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={sortBy}
+                onValueChange={(value) => {
+                  setSortBy(value);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="year-desc">Year (Newest)</SelectItem>
+                  <SelectItem value="year-asc">Year (Oldest)</SelectItem>
+                  <SelectItem value="rating-desc">Highest Rated</SelectItem>
+                  <SelectItem value="rating-asc">Lowest Rated</SelectItem>
+                  <SelectItem value="title-asc">Title A-Z</SelectItem>
+                  <SelectItem value="title-desc">Title Z-A</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -302,6 +328,27 @@ export default function Home() {
                   ))}
                 </SelectContent>
               </Select>
+              <Select
+                value={sortBy}
+                onValueChange={(value) => {
+                  setSortBy(value);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="year-desc">Year (Newest)</SelectItem>
+                  <SelectItem value="year-asc">Year (Oldest)</SelectItem>
+                  <SelectItem value="rating-desc">Highest Rated</SelectItem>
+                  <SelectItem value="rating-asc">Lowest Rated</SelectItem>
+                  <SelectItem value="title-asc">Title A-Z</SelectItem>
+                  <SelectItem value="title-desc">Title Z-A</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {loading ? (
@@ -312,8 +359,8 @@ export default function Home() {
               </div>
             ) : books.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-xl text-muted-foreground mb-4">Your library is empty</p>
-                <p className="text-muted-foreground mb-6">Start building your personal book collection by adding your first book!</p>
+            <p className="text-xl text-muted-foreground mb-4">No books in your collection yet</p>
+            <p className="text-muted-foreground mb-6">Start building your book collection by adding your first book!</p>
                 <Link to="/books/new">
                   <Button size="lg">
                     <Plus className="mr-2 h-5 w-5" />

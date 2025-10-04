@@ -73,7 +73,7 @@ export default function Auth() {
               <BookOpen className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-serif">Welcome to BookReview</CardTitle>
+          <CardTitle className="text-3xl font-serif">Welcome to BookReview Platform</CardTitle>
           <CardDescription>
             Join our community of book lovers to share and discover great reads
           </CardDescription>

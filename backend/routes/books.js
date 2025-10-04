@@ -46,10 +46,40 @@ router.get('/', protect, [
       query.genre = genre;
     }
 
+    // Determine sort order
+    let sortOrder = { createdAt: -1 }; // Default: newest first
+    
+    if (req.query.sortBy) {
+      switch (req.query.sortBy) {
+        case 'oldest':
+          sortOrder = { createdAt: 1 };
+          break;
+        case 'year-desc':
+          sortOrder = { publishedYear: -1 };
+          break;
+        case 'year-asc':
+          sortOrder = { publishedYear: 1 };
+          break;
+        case 'title-asc':
+          sortOrder = { title: 1 };
+          break;
+        case 'title-desc':
+          sortOrder = { title: -1 };
+          break;
+        case 'rating-desc':
+        case 'rating-asc':
+          // For rating sorting, we'll sort after getting the data
+          sortOrder = { createdAt: -1 };
+          break;
+        default:
+          sortOrder = { createdAt: -1 };
+      }
+    }
+
     // Get books with pagination
-    const books = await Book.find(query)
+    let books = await Book.find(query)
       .populate('addedBy', 'name email')
-      .sort({ createdAt: -1 })
+      .sort(sortOrder)
       .skip(skip)
       .limit(limit);
 

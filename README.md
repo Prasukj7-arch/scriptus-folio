@@ -1,14 +1,15 @@
-# Personal Book Library
+# Book Review Platform
 
-A full-stack MERN application for personal book management where users can track, review, and organize their personal reading collection.
+A full-stack MERN application for book discovery and review sharing where users can discover books, share reviews, and connect with fellow book lovers.
 
 ## Features
 
 - **User Authentication**: Sign up and login with JWT tokens
-- **Personal Book Management**: Add, edit, and delete your own books
-- **Personal Review System**: Rate and review your books with 1-5 stars
-- **Search & Filter**: Search by title/author and filter by genre within your collection
-- **Pagination**: Browse your books with pagination (6 books per page)
+- **Book Management**: Add, edit, and delete your own books
+- **Review System**: Rate and review any book with 1-5 stars (except your own)
+- **Search & Filter**: Search by title/author and filter by genre across all books
+- **Pagination**: Browse books with pagination (5 books per page)
+- **Community Features**: View all books and reviews from the community
 - **Responsive Design**: Modern UI with Tailwind CSS and shadcn/ui
 
 ## Tech Stack

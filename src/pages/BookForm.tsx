@@ -123,7 +123,7 @@ export default function BookForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="genre">Genre *</Label>
-                <Input id="genre" placeholder="e.g., Fiction, Mystery, Science Fiction" {...register('genre')} />
+                <Input id="genre" placeholder="e.g., Fiction, Mystery, Romance, Science Fiction" {...register('genre')} />
                 {errors.genre && <p className="text-sm text-destructive">{errors.genre.message}</p>}
               </div>
 

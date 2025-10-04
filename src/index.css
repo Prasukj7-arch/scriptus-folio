@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Literary burgundy and cream theme */
+    /* Literary burgundy and cream theme - Light mode */
     --background: 40 20% 97%;
     --foreground: 0 20% 15%;
 
