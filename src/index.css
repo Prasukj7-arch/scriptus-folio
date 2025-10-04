@@ -44,7 +44,6 @@ All colors MUST be HSL.
 
     /* Custom design tokens */
     --gradient-primary: linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%));
-    --gradient-hero: linear-gradient(135deg, hsl(0 50% 25%), hsl(0 50% 35%), hsl(45 80% 50%));
     --shadow-elegant: 0 10px 30px -10px hsl(0 50% 35% / 0.2);
     --shadow-card: 0 4px 12px -2px hsl(0 20% 15% / 0.1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -80,7 +79,6 @@ All colors MUST be HSL.
     --ring: 0 50% 45%;
 
     --gradient-primary: linear-gradient(135deg, hsl(0 50% 35%), hsl(0 50% 45%));
-    --gradient-hero: linear-gradient(135deg, hsl(0 50% 25%), hsl(0 50% 35%), hsl(45 70% 40%));
     --shadow-elegant: 0 10px 30px -10px hsl(0 50% 45% / 0.3);
     --shadow-card: 0 4px 12px -2px hsl(0 0% 0% / 0.5);
   }
@@ -105,9 +103,6 @@ All colors MUST be HSL.
     background: var(--gradient-primary);
   }
   
-  .gradient-hero {
-    background: var(--gradient-hero);
-  }
   
   .shadow-elegant {
     box-shadow: var(--shadow-elegant);

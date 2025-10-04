@@ -3,7 +3,6 @@ import { BookOpen, Plus, LogIn, LogOut, User, Menu, X, Library, BookMarked, Sun,
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState } from 'react';
 import {
   DropdownMenu,
@@ -100,7 +99,6 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <ThemeToggle />
                 <Button
                   onClick={() => navigate('/auth')}
                   className="gradient-primary hover:opacity-90 transition-smooth"
@@ -224,7 +222,6 @@ export function Navbar() {
                 </>
               ) : (
                 <>
-                  <ThemeToggle />
                   <Button
                     onClick={() => {
                       navigate('/auth');

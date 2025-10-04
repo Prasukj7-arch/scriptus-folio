@@ -408,11 +408,11 @@ export default function BookDetails() {
               });
               return shouldShow;
             })() && (
-              <div>
-                <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
-                  <MessageSquare className="h-6 w-6" />
+            <div>
+              <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+                <MessageSquare className="h-6 w-6" />
                   Write a Review
-                </h2>
+              </h2>
 
                 <div>
                 <Card className="mb-8 shadow-card card-modern dark:card-modern-dark border-0">
