@@ -13,13 +13,6 @@ export default function Footer() {
             <span>All rights reserved</span>
           </div>
 
-          {/* Center - Made with love */}
-          <div className="flex items-center gap-1">
-            <span>Made with</span>
-            <Heart className="h-3 w-3 text-red-500 fill-current" />
-            <span>for book lovers</span>
-          </div>
-
           {/* Right side - Social links */}
           <div className="flex items-center gap-4">
             <a
@@ -32,7 +25,7 @@ export default function Footer() {
               <span className="hidden sm:inline">GitHub</span>
             </a>
             <a
-              href="https://linkedin.com/in/prasuk-jain"
+              href="https://www.linkedin.com/in/prasuk-jain-6704a4248/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-foreground transition-colors duration-200"
