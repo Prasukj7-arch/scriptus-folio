@@ -41,7 +41,7 @@ export function BookCard({
   const isOwner = addedBy && currentUserId && addedBy._id === currentUserId;
   return (
     <Link to={`/books/${id}`}>
-      <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group relative">
+      <Card className="h-full hover:shadow-elegant transition-smooth cursor-pointer group relative hover-lift card-modern dark:card-modern-dark border-0">
         <CardHeader className="space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">

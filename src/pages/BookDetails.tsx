@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Navbar } from '@/components/Navbar';
 import { StarRating } from '@/components/StarRating';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -264,34 +264,34 @@ export default function BookDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
       <Navbar />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-10">
         <Button variant="ghost" onClick={() => navigate('/')} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Books
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-card">
+            <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
               <CardHeader className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex-1 space-y-2">
-                    <h1 className="text-4xl font-bold font-serif">{book.title}</h1>
-                    <div className="flex items-center gap-4 text-muted-foreground">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-serif">{book.title}</h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <User className="h-4 w-4" />
-                        <span>{book.author}</span>
+                        <span className="text-sm sm:text-base">{book.author}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{book.publishedYear}</span>
+                        <span className="text-sm sm:text-base">{book.publishedYear}</span>
                       </div>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="text-lg px-4 py-2">
+                  <Badge variant="secondary" className="text-base sm:text-lg px-3 sm:px-4 py-2 w-fit">
                     {book.genre}
                   </Badge>
                 </div>
@@ -364,7 +364,7 @@ export default function BookDetails() {
                   Rating Distribution
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <Card className="shadow-card">
+                  <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
                     <CardHeader>
                       <CardTitle className="text-lg">Rating Breakdown</CardTitle>
                     </CardHeader>
@@ -381,7 +381,7 @@ export default function BookDetails() {
                     </CardContent>
                   </Card>
                   
-                  <Card className="shadow-card">
+                  <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
                     <CardHeader>
                       <CardTitle className="text-lg">Rating Distribution</CardTitle>
                     </CardHeader>
@@ -479,7 +479,7 @@ export default function BookDetails() {
 
               <div className="space-y-4">
                 {reviews.length === 0 ? (
-                  <Card className="shadow-card">
+                  <Card className="shadow-card hover-lift card-modern dark:card-modern-dark border-0">
                     <CardContent className="py-8 text-center text-muted-foreground">
                       <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
                       <p>No reviews yet. Be the first to review this book!</p>

@@ -98,10 +98,10 @@ export default function BookForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <Card className="shadow-elegant">
+      <main className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
+        <Card className="shadow-elegant hover-lift card-modern dark:card-modern-dark border-0">
           <CardHeader>
             <CardTitle className="text-3xl font-serif">
               {isEdit ? 'Edit Book' : 'Add New Book'}

@@ -65,15 +65,15 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 gradient-hero">
-      <Card className="w-full max-w-md shadow-elegant">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20 relative">
+      <Card className="w-full max-w-md shadow-elegant hover-lift card-modern dark:card-modern-dark border-0">
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-4">
             <div className="gradient-primary p-3 rounded-xl">
               <BookOpen className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-serif">Welcome to BookReview Platform</CardTitle>
+          <CardTitle className="text-3xl font-serif gradient-text-animated">Welcome to BookReview Platform</CardTitle>
           <CardDescription>
             Join our community of book lovers to share and discover great reads
           </CardDescription>

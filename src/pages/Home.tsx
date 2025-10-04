@@ -141,23 +141,29 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-12 text-center">
-          <h1 className="text-5xl font-bold font-serif mb-4 gradient-primary bg-clip-text text-transparent">
+      <main className="container mx-auto px-4 py-8 relative z-10">
+        <div className="mb-8 sm:mb-12 text-center">
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold font-serif mb-6 gradient-text-animated">
             Book Review Platform
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
-            Discover amazing books, share your reviews, and connect with fellow book lovers
+          <p className="text-lg sm:text-xl text-muted-foreground mb-8 px-4 max-w-3xl mx-auto leading-relaxed">
+            Discover amazing books, share your reviews, and connect with fellow book lovers in our vibrant community
           </p>
-          <Link to="/books/new">
-            <Button size="lg" className="text-lg px-8 py-3">
-              <Plus className="mr-2 h-5 w-5" />
-              Add New Book
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link to="/books/new">
+              <Button size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-4 hover-lift gradient-primary shadow-lg">
+                <Plus className="mr-2 h-5 w-5" />
+                Add New Book
+              </Button>
+            </Link>
+            <Button variant="outline" size="lg" className="text-base sm:text-lg px-8 sm:px-10 py-4 hover-lift glass">
+              <BookOpen className="mr-2 h-5 w-5" />
+              Explore Books
             </Button>
-          </Link>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={(value) => {
@@ -176,7 +182,7 @@ export default function Home() {
           </TabsList>
 
           <TabsContent value="all" className="space-y-6">
-            <div className="mb-8 flex flex-col sm:flex-row gap-4">
+            <div className="mb-6 sm:mb-8 flex flex-col gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -189,46 +195,48 @@ export default function Home() {
                   className="pl-10"
                 />
               </div>
-              <Select
-                value={genreFilter}
-                onValueChange={(value) => {
-                  setGenreFilter(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Filter by genre" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Genres</SelectItem>
-                  {genres.map((genre) => (
-                    <SelectItem key={genre} value={genre}>
-                      {genre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={sortBy}
-                onValueChange={(value) => {
-                  setSortBy(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="year-desc">Year (Newest)</SelectItem>
-                  <SelectItem value="year-asc">Year (Oldest)</SelectItem>
-                  <SelectItem value="rating-desc">Highest Rated</SelectItem>
-                  <SelectItem value="rating-asc">Lowest Rated</SelectItem>
-                  <SelectItem value="title-asc">Title A-Z</SelectItem>
-                  <SelectItem value="title-desc">Title Z-A</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  value={genreFilter}
+                  onValueChange={(value) => {
+                    setGenreFilter(value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Filter by genre" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Genres</SelectItem>
+                    {genres.map((genre) => (
+                      <SelectItem key={genre} value={genre}>
+                        {genre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={sortBy}
+                  onValueChange={(value) => {
+                    setSortBy(value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="year-desc">Year (Newest)</SelectItem>
+                    <SelectItem value="year-asc">Year (Oldest)</SelectItem>
+                    <SelectItem value="rating-desc">Highest Rated</SelectItem>
+                    <SelectItem value="rating-asc">Lowest Rated</SelectItem>
+                    <SelectItem value="title-asc">Title A-Z</SelectItem>
+                    <SelectItem value="title-desc">Title Z-A</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {loading ? (

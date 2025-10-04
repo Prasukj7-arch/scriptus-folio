@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Plus, LogIn, LogOut, User } from 'lucide-react';
+import { BookOpen, Plus, LogIn, LogOut, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,21 +15,24 @@ import {
 export function Navbar() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b bg-card/30 backdrop-blur-md sticky top-0 z-50 glass dark:glass-dark">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="gradient-primary p-2 rounded-lg transition-smooth group-hover:scale-105">
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold font-serif gradient-primary bg-clip-text text-transparent">
-              BookReview Platform
+            <span className="text-xl sm:text-2xl font-bold font-serif gradient-text-animated">
+              <span className="hidden sm:inline">BookReview Platform</span>
+              <span className="sm:hidden">BRP</span>
             </span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
             <ThemeToggle />
             {user ? (
               <>
@@ -68,7 +72,74 @@ export function Navbar() {
               </Button>
             )}
           </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 border-t pt-4">
+            <div className="flex flex-col space-y-3">
+              {user ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      navigate('/books/new');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="gradient-primary hover:opacity-90 transition-smooth w-full justify-start"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Book
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      navigate('/profile');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      signOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => {
+                    navigate('/auth');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="gradient-primary hover:opacity-90 transition-smooth w-full justify-start"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
