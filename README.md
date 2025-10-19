@@ -4,7 +4,7 @@ A modern, full-stack MERN application where book lovers can discover, review, an
 
 ## 🚀 Live Demo
 
-- **Frontend**: [https://scriptus-folio-mks6s50ax-prasukjain200005-gmailcoms-projects.vercel.app](https://scriptus-folio-mks6s50ax-prasukjain200005-gmailcoms-projects.vercel.app)
+- **Frontend**: [https://scriptus-folio.vercel.app/](https://scriptus-folio.vercel.app/)
 - **Backend API**: [https://web-production-ac936.up.railway.app](https://web-production-ac936.up.railway.app)
 
 ## 🛠️ Tech Stack
